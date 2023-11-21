@@ -16,6 +16,9 @@ from itertools import chain
 from functools import lru_cache
 import json
 
+import pycparser
+
+
 def memoize(func):
     @lru_cache(maxsize=1000000)
     def memoized(*args, **kwargs):
@@ -29,6 +32,9 @@ def eprint(*args, **kwargs):
 # set_trace(term_size=(180, 50))
 
 from sys import argv
+import sys
+import os
+
 from argparse import ArgumentParser
 import subprocess, re
 from os.path import dirname, abspath
@@ -38,6 +44,10 @@ script_path = dirname(abspath(__file__))
 sys.path.insert(0, '%s/../pycparser' % script_path)
 from pycparser import c_parser, c_ast, c_generator
 
+
+fake_libc_path = os.path.join(script_path, 'fake_libc')
+
+
 #
 # Argument parsing
 #
@@ -45,33 +55,139 @@ from pycparser import c_parser, c_ast, c_generator
 argParser = ArgumentParser()
 argParser.add_argument('-I', '--include', dest='include', help='Preprocesor include path', metavar='<Include Path>', action='append')
 argParser.add_argument('-D', '--define', dest='define', help='Define preprocessor macro', metavar='<Macro Name>', action='append')
-argParser.add_argument('-E', '--external-preprocessing', dest='ep', help='Prevent preprocessing. Assume input file is already preprocessed', metavar='<Preprocessed File>', action='store')
-argParser.add_argument('-M', '--module_name', dest='module_name', help='Module name', metavar='<Module name string>', action='store')
-argParser.add_argument('-MP', '--module_prefix', dest='module_prefix', help='Module prefix that starts every function name', metavar='<Prefix string>', action='store')
-argParser.add_argument('-MD', '--metadata', dest='metadata', help='Optional file to emit metadata (introspection)', metavar='<MetaData File Name>', action='store')
+argParser.add_argument('--external-preprocessing', dest='ep', help='Prevent preprocessing. Assume input file is already preprocessed', metavar='<Preprocessed File>', action='store')
+argParser.add_argument('--module_name', dest='module_name', help='Module name', metavar='<Module name string>', action='store')
+argParser.add_argument('--module_prefix', dest='module_prefix', help='Module prefix that starts every function name', metavar='<Prefix string>', action='store')
+argParser.add_argument('--metadata', dest='metadata', help='Optional file to emit metadata (introspection)', metavar='<MetaData File Name>', action='store')
+argParser.add_argument('--board', dest='board', help='Board or OS', metavar='<Board or OS>', action='store')
+argParser.add_argument('--output', dest='output', help='Output file path', metavar='<Output path>', action='store')
+
 argParser.add_argument('input', nargs='+')
-argParser.set_defaults(include=[], define=[], ep=None, input=[])
-args = argParser.parse_args()
+
+argParser.set_defaults(include=[], define=[], ep=None, input=[], board='')
+args, unknownargs = argParser.parse_known_args()
 
 module_name = args.module_name
 module_prefix = args.module_prefix if args.module_prefix else args.module_name
 
-#
-# C proceprocessing, if needed, or just read the input files.
-#
 
-if not args.ep:
-    pp_cmd = 'gcc -E -std=c99 -DPYCPARSER {macros} {include} {input} {first_input}'.format(
-        input=' '.join('-include %s' % inp for inp in args.input),
-        first_input= '%s' % args.input[0],
-        macros = ' '.join('-D%s' % define for define in args.define),
-        include=' '.join('-I %s' % inc for inc in args.include))
-    s = subprocess.check_output(pp_cmd.split()).decode()
+# this block of code is used to handle the generation of the preprocessor
+# output. Since pycparser has the ability to call the compiler internally
+# there is no need to do it from cmake. Data doesn't need to be going in
+# and out of cmake like that when it can all be done in a single location.
+# it makes things easier.
+
+
+# This function only gets used when compiling under Windows for Windows.
+# It collects SDL2 and reorganizes the folder structure so the SDK include path
+# will be in alignment with what is used in Unix. The include macro for SDL2
+# will not need to be changed if compiling under Windows.
+def get_sdl2():
+    import zipfile
+    import io
+    import os
+    import sys
+    
+    path = os.getcwd()
+    url = 'https://github.com/libsdl-org/SDL/releases/download/release-2.26.5/SDL2-devel-2.26.5-VC.zip'  # NOQA
+
+    def get_path(name: str, p: str) -> str:
+        for file in os.listdir(p):
+            file = os.path.join(p, file)
+
+            if file.endswith(name):
+                return file
+
+            if os.path.isdir(file):
+                if res := get_path(name, file):
+                    return res
+
+    import requests  # NOQA
+
+    stream = io.BytesIO()
+
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+
+        content_length = int(r.headers['Content-Length'])
+        chunks = 0
+        print()
+        sys.stdout.write('\r' + str(chunks) + '/' + str(content_length))
+        sys.stdout.flush()
+
+        for chunk in r.iter_content(chunk_size=1024):
+            stream.write(chunk)
+            chunks += len(chunk)
+            sys.stdout.write('\r' + str(chunks) + '/' + str(content_length))
+            sys.stdout.flush()
+
+    print()
+    stream.seek(0)
+    zf = zipfile.ZipFile(stream)
+
+    for z_item in zf.infolist():
+        for ext in ('.h', '.dll', '.lib'):
+            if not z_item.filename.endswith(ext):
+                continue
+
+            zf.extract(z_item, path=path)
+            break
+
+    include_path = get_path('include', path)
+    lib_path = get_path('lib\\x64', path)
+    dll_path = get_path('SDL2.dll', lib_path)
+
+    sdl_include_path = os.path.split(include_path)[0]
+    if not os.path.exists(os.path.join(sdl_include_path, 'SDL2')):
+        os.rename(include_path, os.path.join(sdl_include_path, 'SDL2'))
+
+    zf.close()
+    stream.close()
+
+    return os.path.abspath(sdl_include_path), dll_path
+    
+
+# when compiling under Windows we want to set up a build system that
+# points to all the right things to allow pycparser to work correctly
+# when generating the preprocessor output. I have not yet fully determined
+# the best way to handle the pyMSVC dependency as it is not needed for
+# folks running any other OS except Windows.
+if sys.platform.startswith('win'):
+    import pyMSVC  # NOQA
+
+    environment = pyMSVC.setup_environment()
+    print(environment)
+    
+    cpp_path = 'cl'
+    cpp_args = [
+        '-std:c11',
+        '/TC',
+        '/MP',
+        '/wd4996',
+        '/wd4244',
+        '/wd4267'
+    ]
+    
+    if args.board == 'win':
+        sdl2_include, _ = get_sdl2()
+        cpp_args.append(f'-I"{sdl2_include}"')
+        
+elif sys.platform.startswith('darwin'):
+    cpp_args = ['-std=c11']
+    cpp_path = 'clang'
+
 else:
-    pp_cmd = 'Preprocessing was disabled.'
-    s = ''
-    with open(args.ep, 'r') as f:
-        s += f.read()
+    cpp_path = 'gcc'
+    cpp_args = [
+        '-std=c11', 
+        # '-Wno-incompatible-pointer-types',
+    ]
+
+cpp_args.extend([f'-D{define}' for define in args.define])
+cpp_args.extend(['-DPYCPARSER', '-E', f'-I{fake_libc_path}'])
+cpp_args.extend([f'-I{include}' for include in args.include])
+cpp_args.extend(unknownargs)
+
 #
 # AST parsing helper functions
 #
@@ -291,7 +407,64 @@ func_prototypes = {}
 
 parser = c_parser.CParser()
 gen = c_generator.CGenerator()
-ast = parser.parse(s, filename='<none>')
+
+ast = pycparser.parse_file(
+    args.input[0], 
+    use_cpp=True, 
+    cpp_path=cpp_path,
+    cpp_args=cpp_args
+)
+
+pp_cmd = cpp_path + (' '.join(cpp_args))
+
+# the stdout code below is to override output to stdout from the print
+# statements. This will output to a file instead of stdout. This is done
+# because of how cmake works and it removing all of the semicolons when the
+# output gets stored in a cmake variable and then written to a file using cmake
+
+import sys  # NOQA
+
+
+class STDOut:
+
+    def __init__(self):
+        self._stdout = sys.stdout
+        self._file = open(args.output, 'w')
+
+        sys.stdout = self  # NOQA
+
+    def write(self, data):
+        self._file.write(data)
+
+    def flush(self):
+        self._file.flush()
+
+    def close(self):
+        try:
+            self._file.close()
+        except:  # NOQA
+            pass
+        else:
+            sys.stdout = self._stdout  # NOQA
+
+    def __getattr__(self, item):
+        if item in self.__dict__:
+            return self.__dict__[item]
+
+        return getattr(self._stdout, item)
+
+
+stdout = STDOut()
+
+_old_excepthook = sys.excepthook
+
+
+def my_excepthook(exc_type, exc_value, tb):
+    stdout.close()
+    return _old_excepthook(exc_type, exc_value, tb)
+
+
+sys.excepthook = my_excepthook
 
 # Types and structs
 
@@ -764,7 +937,6 @@ GENMPY_UNUSED STATIC MP_DEFINE_CONST_OBJ_TYPE(
     MP_QSTR_function,
     MP_TYPE_FLAG_BINDS_SELF | MP_TYPE_FLAG_BUILTIN_FUN,
     call, lv_fun_builtin_var_call,
-    unary_op, mp_generic_unary_op,
     buffer, mp_func_get_buffer
 );
 
@@ -773,7 +945,6 @@ GENMPY_UNUSED STATIC MP_DEFINE_CONST_OBJ_TYPE(
     MP_QSTR_function,
     MP_TYPE_FLAG_BUILTIN_FUN,
     call, lv_fun_builtin_var_call,
-    unary_op, mp_generic_unary_op,
     buffer, mp_func_get_buffer
 );
 
@@ -2958,4 +3129,4 @@ if args.metadata:
     with open(args.metadata, 'w') as metadata_file:
         json.dump(metadata, metadata_file, indent=4)
 
-
+stdout.close()
