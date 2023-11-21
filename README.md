@@ -2,6 +2,46 @@
 
 # Bindings for LVGL
 
+
+---
+
+This is an expermental build system. Quick brief on how to use.
+
+Python needs to be used for the ESP32 all others you can use Python to build
+or you can use the traditional way with one change. The user c module location
+has changed. Micropython is not longer the parent and the binding a submodule.
+It is now the other way around. So you have to run `git submodules init --recursive`
+to pull in the submodules. To point the build system to the user c module add 
+`USER_C_MODULE=../../micropython.cmake`.
+
+If you decide to use the python build system it works as follows.
+
+`make.py {port} {compile args}`
+port is the folder name of the port you wish to compile.
+compile args is just that, any compile arguments that need to be added.
+
+as an example
+
+`make.py esp32 BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
+
+you do not need to add the USER_C_MODULES this is done for you autoomatically
+You do not need to build mpy_cross, this is also done automatically. Submodules 
+are the same.
+
+each time you compile mpy_cross and the sumbodules will be compiled unless you 
+tell it not to. That is because it only needs to be done once so after that you 
+don't need to do it again.
+
+`make.py esp32 --skip_mpy_cross --skip_submodules BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
+
+With the ESP32 if the firmware is not able to fit correctly into the application partition
+the script will automatically make the changes needed to get it to fit. This is only going to work
+if you use the buards that are supplied with MicroPython. When it dones this the 
+compilation will fail the first time and then it will make the needed modifications
+then perform a clean and restart compiling. If you continue to flach the same board
+ithout changing anything then this is only going to take place the first time.
+
+
 ---
 
 This repo is a submodule of [lv_micropython](https://github.com/lvgl/lv_micropython).
