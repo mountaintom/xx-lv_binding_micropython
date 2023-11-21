@@ -2,3 +2,6 @@
 	path = lvgl
 	url = https://github.com/lvgl/lvgl.git
 
+[submodule "micropython"]
+	path = micropython
+	url = https://github.com/micropython/micropython.git
