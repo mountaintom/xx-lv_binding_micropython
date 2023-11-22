@@ -235,7 +235,6 @@ if target.lower() == 'esp32':
     'make.py esp32 BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
 
     esp32_common_path = os.path.join(
-        MPY_DIR,
         'ports',
         'esp32',
         'esp32_common.cmake'
