@@ -153,17 +153,17 @@ else:
 
 
 if target == 'esp32':
-    clean_cmd.append('USER_C_MODULES=../../../micropython.cmake')
-    compile_cmd.append('USER_C_MODULES=../../../micropython.cmake')
-    submodules_cmd.append('USER_C_MODULES=../../../micropython.cmake')
+    clean_cmd.append('USER_C_MODULES=../../../../micropython.cmake')
+    compile_cmd.append('USER_C_MODULES=../../../../micropython.cmake')
+    submodules_cmd.append('USER_C_MODULES=../../../../micropython.cmake')
 else:
     if clean_cmd:
-        clean_cmd.append('USER_C_MODULES=../../micropython.cmake')
+        clean_cmd.append('USER_C_MODULES=../../../micropython.cmake')
 
     if submodules_cmd:
-        submodules_cmd.append('USER_C_MODULES=../../micropython.cmake')
+        submodules_cmd.append('USER_C_MODULES=../../../micropython.cmake')
 
-    compile_cmd.append('USER_C_MODULES=../../micropython.cmake')
+    compile_cmd.append('USER_C_MODULES=../../../micropython.cmake')
 
 
 def spawn(cmd):
