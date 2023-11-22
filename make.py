@@ -13,19 +13,28 @@ target = args.pop(0)
 
 argParser = ArgumentParser()
 argParser.add_argument(
-    '--skip_mpy_cross',
-    dest='skip_mpy_cross',
-    help='Skip compiling mpy_cross',
-    metavar='<Skip myp_cross>',
+    'skip_mpy_cross',
+    dest='mpy_cross',
+    help='compile mpy_cross',
+    metavar='<myp_cross>',
     action='store_true'
 )
 argParser.add_argument(
-    '--skip_submodules',
-    dest='skip_submodules',
-    help='Skip building submodules',
-    metavar='<Skip submodules>',
+    'submodules',
+    dest='submodules',
+    help='build submodules',
+    metavar='<submodules>',
     action='store_true'
 )
+
+argParser.add_argument(
+    'clean',
+    dest='clean',
+    help='clean the build',
+    metavar='<clean>',
+    action='store_true'
+)
+
 args, extra_args = argParser.parse_known_args(args)
 
 os.chdir(MPY_DIR)
@@ -173,10 +182,11 @@ def spawn(cmd):
         cmd = ' '.join(cmd) + '\n'
 
         p = subprocess.Popen(
-            SHELL,
+            'bash',
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE
+            stdin=subprocess.PIPE,
+            shell=True
         )
 
         p.stdin.write(cmd.encode('utf-8'))
@@ -208,19 +218,25 @@ def spawn(cmd):
     return p.returncode, output_buffer
 
 
-if not args.skip_mpy_cross:
+if args.mpy_cross:
     return_code, _ = spawn(mpy_cross_cmd)
     if return_code != 0:
         sys.exit(return_code)
 
-if not args.skip_submodules:
+if args.submodules:
     return_code, _ = spawn(submodules_cmd)
     if return_code != 0:
         sys.exit(return_code)
 
+
+if args.clean:
     spawn(clean_cmd)
 
+
 if target.lower == 'esp32':
+
+    'make.py esp32 mpy_cross submodules BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
+    'make.py esp32 BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
 
     esp32_common_path = os.path.join(
         MPY_DIR,
@@ -241,7 +257,7 @@ if target.lower == 'esp32':
         data1 += data3
         with open(esp32_common_path, 'w') as f:
             f.write(data1)
-                
+
     partition_file_names = [
         'partitions-32MiB.csv',
         'partitions-32MiB-ota.csv',
