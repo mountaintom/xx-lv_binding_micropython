@@ -123,9 +123,9 @@ class Partition:
 
 if target == 'unix':
     mpy_cross_cmd = []
-    clean_cmd = ['make', 'clean', '-C', 'ports/{target}'] + extra_args
-    compile_cmd = ['make', '-C', 'ports/{target}'] + extra_args
-    submodules_cmd = ['make', 'submodules', '-C', 'ports/{target}'] + extra_args
+    clean_cmd = ['make', 'clean', '-C', f'ports/{target}'] + extra_args
+    compile_cmd = ['make', '-C', f'ports/{target}'] + extra_args
+    submodules_cmd = ['make', 'submodules', '-C', f'ports/{target}'] + extra_args
 elif target == 'windows':
     if sys.platform.startswith('win'):
         try:
@@ -138,19 +138,18 @@ elif target == 'windows':
 
         mpy_cross_cmd = ['msbuild', 'mpy-cross/mpy-cross.vcxproj']
         clean_cmd = []
-        compile_cmd = ['msbuild'] + extra_args + [
-            os.path.join('ports', target, 'micropython.vcxproj')]
+        compile_cmd = ['msbuild'] + extra_args + [f'ports/{target}/micropython.vcxproj']
         submodules_cmd = []
     else:
         mpy_cross_cmd = ['make', '-C', 'mpy-cross']
-        clean_cmd = ['make', 'clean', '-C', 'ports/{target}'] + extra_args
-        compile_cmd = ['make', '-C', 'ports/{target}'] + extra_args
+        clean_cmd = ['make', 'clean', '-C', f'ports/{target}'] + extra_args
+        compile_cmd = ['make', '-C', f'ports/{target}'] + extra_args
         submodules_cmd = []
 else:
     mpy_cross_cmd = ['make', '-C', 'mpy-cross']
-    clean_cmd = ['make', 'clean', '-C', 'ports/{target}'] + extra_args
-    compile_cmd = ['make', '-C', 'ports/{target}'] + extra_args
-    submodules_cmd = ['make', 'submodules', '-C', 'ports/{target}'] + extra_args
+    clean_cmd = ['make', 'clean', '-C', f'ports/{target}'] + extra_args
+    compile_cmd = ['make', '-C', f'ports/{target}'] + extra_args
+    submodules_cmd = ['make', 'submodules', '-C', f'ports/{target}'] + extra_args
 
 
 if target == 'esp32':
