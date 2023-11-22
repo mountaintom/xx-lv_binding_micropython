@@ -13,14 +13,14 @@ target = args.pop(0)
 
 argParser = ArgumentParser()
 argParser.add_argument(
-    'skip_mpy_cross',
+    '-mpy_cross',
     dest='mpy_cross',
     help='compile mpy_cross',
     metavar='<myp_cross>',
     action='store_true'
 )
 argParser.add_argument(
-    'submodules',
+    '-submodules',
     dest='submodules',
     help='build submodules',
     metavar='<submodules>',
@@ -28,7 +28,7 @@ argParser.add_argument(
 )
 
 argParser.add_argument(
-    'clean',
+    '-clean',
     dest='clean',
     help='clean the build',
     metavar='<clean>',
