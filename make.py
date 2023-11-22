@@ -222,6 +222,26 @@ if not args.skip_submodules:
 
 if target.lower == 'esp32':
 
+    esp32_common_path = os.path.join(
+        MPY_DIR,
+        'ports',
+        'esp32',
+        'esp32_common.cmake'
+    )
+
+    with open(esp32_common_path, 'r') as f:
+        data = f.read()
+
+    if 'esp_lcd' not in data:
+        data1, data2 = data.split('APPEND IDF_COMPONENTS', 1)
+        data1 += 'APPEND IDF_COMPONENTS'
+        data2, data3 = data2.split(')', 1)
+        data1 += data2
+        data1 += '    esp_lcd\n)'
+        data1 += data3
+        with open(esp32_common_path, 'w') as f:
+            f.write(data1)
+                
     partition_file_names = [
         'partitions-32MiB.csv',
         'partitions-32MiB-ota.csv',
