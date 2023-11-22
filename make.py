@@ -230,7 +230,6 @@ if args.clean:
 
 
 if target.lower() == 'esp32':
-
     'make.py esp32 mpy_cross submodules BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
     'make.py esp32 BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
 
@@ -262,11 +261,7 @@ if target.lower() == 'esp32':
         'partitions-4MiB.csv',
     ]
 
-    base_path = os.path.join(
-        MPY_DIR,
-        'ports',
-        'esp32'
-    )
+    base_path = os.path.join('ports', 'esp32')
 
     partition_file_names = {
         name: os.path.join(base_path, name) for name in partition_file_names
