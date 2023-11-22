@@ -229,7 +229,7 @@ if args.clean:
     spawn(clean_cmd)
 
 
-if target.lower == 'esp32':
+if target.lower() == 'esp32':
 
     'make.py esp32 mpy_cross submodules BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
     'make.py esp32 BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
@@ -245,12 +245,10 @@ if target.lower == 'esp32':
         data = f.read()
 
     if 'esp_lcd' not in data:
-        data1, data2 = data.split('APPEND IDF_COMPONENTS', 1)
-        data1 += 'APPEND IDF_COMPONENTS'
-        data2, data3 = data2.split(')', 1)
+        data1, data2 = data.split('esp_wifi\n', 1)
+        data1 += 'esp_wifi\n'
+        data1 += '    esp_lcd\n'
         data1 += data2
-        data1 += '    esp_lcd\n)'
-        data1 += data3
         with open(esp32_common_path, 'w') as f:
             f.write(data1)
 
