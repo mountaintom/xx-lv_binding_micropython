@@ -29,15 +29,15 @@ You do not need to add the USER_C_MODULES this is done for you automatically.
 
 You have to specifically state what you want to do just like with make. so if you want to compile mpy_cross, collect any submoduless or clean the build
 
-`make.py esp32 mpy_cross`
+`make.py esp32 -mpy_cross`
 
-`make.py esp32 submodules`
+`make.py esp32 -submodules`
 
-`make.py esp32 clean BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
+`make.py esp32 -clean BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
 
 or you can daisy chain them
 
-`make.py esp32 mpy_cross submodules clean BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
+`make.py esp32 -mpy_cross -submodules -clean BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
 
 With the ESP32 if the firmware is not able to fit correctly into the application partition
 the script will automatically make the changes needed to get it to fit. This is only going to work
