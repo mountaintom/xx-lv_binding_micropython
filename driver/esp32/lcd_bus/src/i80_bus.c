@@ -1,8 +1,4 @@
-
-#if (SOC_LCD_I80_SUPPORTED == 1)
-
-#include "i80_bus.h"
-#include "bus_common.h"
+#include "../include/bus_common.h"
 
 #include "esp_lcd_panel_io.h"
 #include "esp_heap_caps.h"
@@ -13,7 +9,11 @@
 #include "py/runtime.h"
 #include "py/gc.h"
 
+
 #include <string.h>
+
+#if SOC_LCD_I80_SUPPORTED
+#include "../include/i80_bus.h"
 
 
 bool i80_bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
@@ -32,7 +32,6 @@ STATIC void mp_lcd_i80_bus_print(const mp_print_t *print, mp_obj_t self_in, mp_p
 {
     (void) kind;
     mp_lcd_i80_bus_obj_t *self = MP_OBJ_TO_PTR(self_in);
-
     if (self->bus_config.bus_width == 8) {
         mp_printf(
             print,
@@ -124,8 +123,9 @@ STATIC void mp_lcd_i80_bus_print(const mp_print_t *print, mp_obj_t self_in, mp_p
             self->bus_config.data_gpio_nums[4],
             self->bus_config.data_gpio_nums[5],
             self->bus_config.data_gpio_nums[6],
-            self->bus_config.data_gpio_nums[7],
-            self->bus_config.data_gpio_nums[8],
+            self->bus_config.data_gpio_nums[7]
+            #if (SOC_LCD_I80_BUS_WIDTH > 8)
+            ,self->bus_config.data_gpio_nums[8],
             self->bus_config.data_gpio_nums[9],
             self->bus_config.data_gpio_nums[10],
             self->bus_config.data_gpio_nums[11],
@@ -133,6 +133,17 @@ STATIC void mp_lcd_i80_bus_print(const mp_print_t *print, mp_obj_t self_in, mp_p
             self->bus_config.data_gpio_nums[13],
             self->bus_config.data_gpio_nums[14],
             self->bus_config.data_gpio_nums[15]
+            #endif
+            #if (SOC_LCD_I80_BUS_WIDTH > 16)
+            ,self->bus_config.data_gpio_nums[16],
+            self->bus_config.data_gpio_nums[17],
+            self->bus_config.data_gpio_nums[18],
+            self->bus_config.data_gpio_nums[19],
+            self->bus_config.data_gpio_nums[20],
+            self->bus_config.data_gpio_nums[21],
+            self->bus_config.data_gpio_nums[22],
+            self->bus_config.data_gpio_nums[23]
+            #endif
         );
     }
 }
@@ -151,29 +162,25 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
         ARG_data5,
         ARG_data6,
         ARG_data7,
-        #if (SOC_LCD_I80_BUS_WIDTH >= 9)
+        #if (SOC_LCD_I80_BUS_WIDTH > 8)
         ARG_data8,
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 10)
         ARG_data9,
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 11)
         ARG_data10,
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 12)
         ARG_data11,
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 13)
         ARG_data12,
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 14)
         ARG_data13,
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 15)
         ARG_data14,
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 16)
         ARG_data15,
+        #endif
+        #if (SOC_LCD_I80_BUS_WIDTH > 16)
+        ARG_data16,
+        ARG_data17,
+        ARG_data18,
+        ARG_data19,
+        ARG_data20,
+        ARG_data21,
+        ARG_data22,
+        ARG_data23,
         #endif
         ARG_freq,
         ARG_dc_idle_level,
@@ -204,29 +211,25 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
         { MP_QSTR_data5,              MP_ARG_INT  | MP_ARG_REQUIRED                        },
         { MP_QSTR_data6,              MP_ARG_INT  | MP_ARG_REQUIRED                        },
         { MP_QSTR_data7,              MP_ARG_INT  | MP_ARG_REQUIRED                        },
-        #if (SOC_LCD_I80_BUS_WIDTH >= 9)
+        #if (SOC_LCD_I80_BUS_WIDTH > 8)
         { MP_QSTR_data8,              MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 10)
         { MP_QSTR_data9,              MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 11)
         { MP_QSTR_data10,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 12)
         { MP_QSTR_data11,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 13)
         { MP_QSTR_data12,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 14)
         { MP_QSTR_data13,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 15)
         { MP_QSTR_data14,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
-        #endif
-        #if (SOC_LCD_I80_BUS_WIDTH >= 16)
         { MP_QSTR_data15,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        #endif
+        #if (SOC_LCD_I80_BUS_WIDTH > 16)
+        { MP_QSTR_data16,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        { MP_QSTR_data17,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        { MP_QSTR_data18,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        { MP_QSTR_data19,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        { MP_QSTR_data20,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        { MP_QSTR_data21,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        { MP_QSTR_data22,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
+        { MP_QSTR_data23,             MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = -1       } },
         #endif
         { MP_QSTR_freq,               MP_ARG_INT  | MP_ARG_KW_ONLY,  { .u_int = 10000000 } },
         { MP_QSTR_dc_idle_level,      MP_ARG_BOOL | MP_ARG_KW_ONLY,  { .u_bool = false   } },
@@ -258,7 +261,6 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
     // create new object
     mp_lcd_i80_bus_obj_t *self = m_new_obj(mp_lcd_i80_bus_obj_t);
     self->base.type = &mp_lcd_i80_bus_type;
-
 
     self->buffer_size = (int) args[ARG_buffer_size].u_int;
     self->fb_in_psram = (bool) args[ARG_fb_in_psram].u_bool;
@@ -298,29 +300,25 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
     self->bus_config.data_gpio_nums[5] = args[ARG_data5].u_int;
     self->bus_config.data_gpio_nums[6] = args[ARG_data6].u_int;
     self->bus_config.data_gpio_nums[7] = args[ARG_data7].u_int;
-    #if (SOC_LCD_I80_BUS_WIDTH >= 9)
+    #if (SOC_LCD_I80_BUS_WIDTH > 8)
     self->bus_config.data_gpio_nums[8] = args[ARG_data8].u_int;
-    #endif
-    #if (SOC_LCD_I80_BUS_WIDTH >= 10)
     self->bus_config.data_gpio_nums[9] = args[ARG_data9].u_int;
-    #endif
-    #if (SOC_LCD_I80_BUS_WIDTH >= 11)
     self->bus_config.data_gpio_nums[10] = args[ARG_data10].u_int;
-    #endif
-    #if (SOC_LCD_I80_BUS_WIDTH >= 12)
     self->bus_config.data_gpio_nums[11] = args[ARG_data11].u_int;
-    #endif
-    #if (SOC_LCD_I80_BUS_WIDTH >= 13)
     self->bus_config.data_gpio_nums[12] = args[ARG_data12].u_int;
-    #endif
-    #if (SOC_LCD_I80_BUS_WIDTH >= 14)
     self->bus_config.data_gpio_nums[13] = args[ARG_data13].u_int;
-    #endif
-    #if (SOC_LCD_I80_BUS_WIDTH >= 15)
     self->bus_config.data_gpio_nums[14] = args[ARG_data14].u_int;
-    #endif
-    #if (SOC_LCD_I80_BUS_WIDTH >= 16)
     self->bus_config.data_gpio_nums[15] = args[ARG_data15].u_int;
+    #endif
+    #if (SOC_LCD_I80_BUS_WIDTH > 16)
+    self->bus_config.data_gpio_nums[16] = args[ARG_data16].u_int;
+    self->bus_config.data_gpio_nums[17] = args[ARG_data17].u_int;
+    self->bus_config.data_gpio_nums[18] = args[ARG_data18].u_int;
+    self->bus_config.data_gpio_nums[19] = args[ARG_data19].u_int;
+    self->bus_config.data_gpio_nums[20] = args[ARG_data20].u_int;
+    self->bus_config.data_gpio_nums[21] = args[ARG_data21].u_int;
+    self->bus_config.data_gpio_nums[22] = args[ARG_data22].u_int;
+    self->bus_config.data_gpio_nums[23] = args[ARG_data23].u_int;
     #endif
 
     uint8_t i = 0;
@@ -531,6 +529,7 @@ STATIC mp_obj_t mp_lcd_i80_bus_rx_param(size_t n_args, const mp_obj_t *pos_args,
     if (ret != 0) {
         mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_rx_param)", ret);
     }
+
     return mp_const_none;
 }
 
@@ -606,6 +605,7 @@ STATIC inline void mp_lcd_i80_bus_p_tx_color(mp_obj_base_t *self_in, int lcd_cmd
 
 
 STATIC inline void mp_lcd_i80_bus_p_deinit(mp_obj_base_t *self_in) {
+    #if (SOC_LCD_I80_SUPPORTED == 1)
     mp_lcd_i80_bus_obj_t *self = (mp_lcd_i80_bus_obj_t *)self_in;
 
     esp_err_t ret = esp_lcd_panel_io_del(self->panel_io_handle);
@@ -620,6 +620,7 @@ STATIC inline void mp_lcd_i80_bus_p_deinit(mp_obj_base_t *self_in) {
 
     heap_caps_free(self->buf1);
     heap_caps_free(self->buf2);
+    #endif
 }
 
 
@@ -651,4 +652,10 @@ const mp_obj_type_t mp_lcd_i80_bus_type = {
 };
 #endif
 
-#endif /*(SOC_LCD_I80_SUPPORTED == 1)*/
+#else
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_lcd_i80_bus_type,
+    MP_QSTR_I8080Bus,
+    MP_TYPE_FLAG_NONE
+);
+#endif /*SOC_LCD_I80_SUPPORTED*/

@@ -1,11 +1,7 @@
 
-#if (SOC_LCD_RGB_SUPPORTED == 1)
-
-#include "rgb_bus.h"
-#include "bus_common.h"
+#include "../include/bus_common.h"
 
 #include "esp_lcd_panel_io.h"
-#include "esp_lcd_panel_rgb.h"
 #include "esp_lcd_panel_ops.h"
 
 #include "mphalport.h"
@@ -14,6 +10,10 @@
 #include "py/gc.h"
 
 #include <string.h>
+
+#if SOC_LCD_RGB_SUPPORTED
+#include "esp_lcd_panel_rgb.h"
+#include "../include/rgb_bus.h"
 
 
 bool rgb_bus_trans_done_cb(esp_lcd_panel_handle_t panel_io, const esp_lcd_rgb_panel_event_data_t *edata, void *user_ctx)
@@ -60,53 +60,15 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         ARG_data5,
         ARG_data6,
         ARG_data7,
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
+        #if (SOC_LCD_RGB_DATA_WIDTH > 8)
         ARG_data8,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
         ARG_data9,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
         ARG_data10,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
         ARG_data11,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
         ARG_data12,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
         ARG_data13,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
         ARG_data14,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
         ARG_data15,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data16,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data17,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data18,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data19,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data20,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data21,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data22,
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
-        ARG_data23,
         #endif
         ARG_freq,
         ARG_num_fbs,
@@ -142,53 +104,15 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         { MP_QSTR_data5,              MP_ARG_INT  | MP_ARG_REQUIRED                      },
         { MP_QSTR_data6,              MP_ARG_INT  | MP_ARG_REQUIRED                      },
         { MP_QSTR_data7,              MP_ARG_INT  | MP_ARG_REQUIRED                      },
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
+        #if (SOC_LCD_RGB_DATA_WIDTH > 8)
         { MP_QSTR_data8,              MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 10)
         { MP_QSTR_data9,              MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 11)
         { MP_QSTR_data10,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 12)
         { MP_QSTR_data11,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 13)
         { MP_QSTR_data12,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 14)
         { MP_QSTR_data13,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 15)
         { MP_QSTR_data14,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 16)
         { MP_QSTR_data15,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 17)
-        { MP_QSTR_data16,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 18)
-        { MP_QSTR_data17,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 19)
-        { MP_QSTR_data18,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 20)
-        { MP_QSTR_data19,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 21)
-        { MP_QSTR_data20,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 22)
-        { MP_QSTR_data21,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 23)
-        { MP_QSTR_data22,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
-        #endif
-        #if (SOC_LCD_RGB_DATA_WIDTH >= 24)
-        { MP_QSTR_data23,             MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = -1      } },
         #endif
         { MP_QSTR_freq,               MP_ARG_INT  | MP_ARG_KW_ONLY, { .u_int = 8000000 } },
         { MP_QSTR_num_fbs,            MP_ARG_BOOL | MP_ARG_KW_ONLY, { .u_int = 2       } },
@@ -249,55 +173,16 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     self->panel_io_config.data_gpio_nums[5] = args[ARG_data5].u_int;
     self->panel_io_config.data_gpio_nums[6] = args[ARG_data6].u_int;
     self->panel_io_config.data_gpio_nums[7] = args[ARG_data7].u_int;
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 9)
+    #if (SOC_LCD_RGB_DATA_WIDTH > 8)
     self->panel_io_config.data_gpio_nums[8] = args[ARG_data8].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 10)
     self->panel_io_config.data_gpio_nums[9] = args[ARG_data9].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 11)
     self->panel_io_config.data_gpio_nums[10] = args[ARG_data10].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 12)
     self->panel_io_config.data_gpio_nums[11] = args[ARG_data11].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 13)
     self->panel_io_config.data_gpio_nums[12] = args[ARG_data12].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 14)
     self->panel_io_config.data_gpio_nums[13] = args[ARG_data13].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 15)
     self->panel_io_config.data_gpio_nums[14] = args[ARG_data14].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 16)
     self->panel_io_config.data_gpio_nums[15] = args[ARG_data15].u_int;
     #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 17)
-    self->panel_io_config.data_gpio_nums[16] = args[ARG_data16].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 18)
-    self->panel_io_config.data_gpio_nums[17] = args[ARG_data17].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 19)
-    self->panel_io_config.data_gpio_nums[18] = args[ARG_data18].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 20)
-    self->panel_io_config.data_gpio_nums[19] = args[ARG_data19].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 21)
-    self->panel_io_config.data_gpio_nums[20] = args[ARG_data20].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 22)
-    self->panel_io_config.data_gpio_nums[21] = args[ARG_data21].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 23)
-    self->panel_io_config.data_gpio_nums[22] = args[ARG_data22].u_int;
-    #endif
-    #if (SOC_LCD_RGB_DATA_WIDTH >= 24)
-    self->panel_io_config.data_gpio_nums[23] = args[ARG_data23].u_int;
-    #endif
-
     self->panel_io_config.disp_gpio_num = (int)args[ARG_disp].u_int;
     self->panel_io_config.sram_trans_align = 64;
     self->panel_io_config.psram_trans_align = 64;
@@ -617,4 +502,11 @@ const mp_obj_type_t mp_lcd_rgb_bus_type = {
 };
 #endif
 
-#endif /*(SOC_LCD_RGB_SUPPORTED == 1)*/
+#else
+MP_DEFINE_CONST_OBJ_TYPE(
+    mp_lcd_rgb_bus_type,
+    MP_QSTR_RGBBus,
+    MP_TYPE_FLAG_NONE
+);
+
+#endif /*SOC_LCD_RGB_SUPPORTED*/

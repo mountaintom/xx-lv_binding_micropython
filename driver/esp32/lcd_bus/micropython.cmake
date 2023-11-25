@@ -1,28 +1,23 @@
-
-
 # Create an INTERFACE library for our C module.
+
 add_library(usermod_lcd_bus INTERFACE)
-
-# list of source files
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.c)
-
-set(I2C_BUS_SRC ${I2C_BUS_INC}/i2c_bus.c)
-set(I80_BUS_SRC ${I80_BUS_INC}/i80_bus.c)
-set(SPI_BUS_SRC ${SPI_BUS_INC}/spi_bus.c)
-set(RGB_BUS_SRC ${RGB_BUS_INC}/rgb_bus.c)
 
 set(INCLUDES
     ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/common
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-# compile options
-target_compile_definitions(usermod_lcd_bus INTERFACE USE_ESP_LCD=1)
+set(SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/src/modlcd_bus.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/i2c_bus.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/spi_bus.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/i80_bus.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/rgb_bus.c
+)
+
 
 # Add our source files to the lib
 target_sources(usermod_lcd_bus INTERFACE ${SOURCES})
-
-target_compile_options(usermod_lcd_bus INTERFACE "-g")
 
 # Add include directories.
 target_include_directories(usermod_lcd_bus INTERFACE ${INCLUDES})

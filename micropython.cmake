@@ -15,11 +15,11 @@ file(GLOB_RECURSE LVGL_HEADERS ${CMAKE_CURRENT_LIST_DIR}/lvgl/src/*.h ${CMAKE_CU
 # if add_custom_command is used it errors becasue add_custom_command doesn't
 # actually run before the lv_mp.c file gets added to the source list. That causes
 # the compilation to error because the source file doesn't exist. It needs to
-exist before it gets added to the source list and this is the only way I have
-found to go about doing it.
+# exist before it gets added to the source list and this is the only way I have
+# found to go about doing it.
 execute_process(
     COMMAND
-        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/gen/gen_mpy.py ${LV_CFLAGS} --output=${CMAKE_BINARY_DIR}/lv_mp.c --include=${CMAKE_CURRENT_LIST_DIR} --include=${CMAKE_CURRENT_LIST_DIR}/lvgl --board=esp32 --module_name=lvgl --module_prefix=lv --metadata=${CMAKE_BINARY_DIR}/lv_mp.c.json ${CMAKE_CURRENT_LIST_DIR}/lvgl/lvgl.h
+        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/gen/gen_mpy.py ${LV_CFLAGS} --output=${CMAKE_BINARY_DIR}/lv_mp.c --include=${CMAKE_CURRENT_LIST_DIR} --include=${CMAKE_CURRENT_LIST_DIR}/include --include=${CMAKE_CURRENT_LIST_DIR}/lvgl --board=esp32 --module_name=lvgl --module_prefix=lv --metadata=${CMAKE_BINARY_DIR}/lv_mp.c.json ${CMAKE_CURRENT_LIST_DIR}/lvgl/lvgl.h
     WORKING_DIRECTORY
         ${CMAKE_CURRENT_LIST_DIR}
 
@@ -44,8 +44,9 @@ target_compile_options(lvgl_interface INTERFACE ${LV_CFLAGS})
 
 
 set(LVGL_MPY_INCLUDES
-    ${CMAKE_CURRENT_LIST_DIR}/../micropython
+    ${CMAKE_CURRENT_LIST_DIR}/micropython
     ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 

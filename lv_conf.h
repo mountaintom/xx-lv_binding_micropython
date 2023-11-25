@@ -317,9 +317,9 @@
  *Used if lvgl is bound to higher level language and the memory is managed by that language*/
 
  //This has been disabled for the time being until I work out the kinks in it.
-#define LV_ENABLE_GC 0
+#define LV_ENABLE_GC 1
 #if LV_ENABLE_GC != 0
-    #define LV_GC_INCLUDE "lib/lv_bindings/include/lv_mp_root_pointers.h"   /*Include Garbage Collector related things*/
+    #define LV_GC_INCLUDE "lv_mp_root_pointers.h"   /*Include Garbage Collector related things*/
     #define LV_GC_ROOT(x) MP_STATE_VM(lvgl_root_pointers->x)
     #define LV_GC_INIT() MP_STATE_VM(lvgl_root_pointers) =  m_new0(lvgl_root_pointers_t, 1)
 #endif /*LV_ENABLE_GC*/

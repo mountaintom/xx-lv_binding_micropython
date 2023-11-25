@@ -1,5 +1,3 @@
-#ifndef LCD_SPI_BUS_H_
-#define LCD_SPI_BUS_H_
 
 #include "mphalport.h"
 #include "py/obj.h"
@@ -32,5 +30,3 @@ typedef struct _mp_lcd_spi_bus_obj_t {
 
 
 extern const mp_obj_type_t mp_lcd_spi_bus_type;
-
-#endif /*LCD_SPI_BUS_H_*/

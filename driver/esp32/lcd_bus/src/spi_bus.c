@@ -1,12 +1,12 @@
-#include "spi_bus.h"
-#include "bus_common.h"
+#include "../include/spi_bus.h"
+#include "../include/bus_common.h"
+
 #include "esp_lcd_panel_io.h"
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
 #include "soc/gpio_sig_map.h"
 #include "rom/gpio.h"
 #include "soc/spi_pins.h"
-
 #include "esp_heap_caps.h"
 
 #include "mphalport.h"

@@ -1,5 +1,5 @@
-#include "i2c_bus.h"
-#include "bus_common.h"
+#include "../include/i2c_bus.h"
+#include "../include/bus_common.h"
 
 #include "esp_lcd_panel_io.h"
 #include "esp_heap_caps.h"
@@ -11,7 +11,6 @@
 #include "py/gc.h"
 
 #include <string.h>
-
 
 
 bool i2c_bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)

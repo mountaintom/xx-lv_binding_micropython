@@ -38,7 +38,11 @@ os.chdir(MPY_DIR)
 
 
 def get_partition_file_name(otp):
-    build_path = otp.split('Running cmake in directory ', 1)[-1]
+    if 'Running cmake in directory ' in otp:
+        build_path = otp.split('Running cmake in directory ', 1)[-1]
+    else:
+        build_path = otp.split('Running ninja in directory ', 1)[-1]
+
     build_path = build_path.split('\n', 1)[0]
 
     target_file = os.path.join(build_path, 'sdkconfig')
@@ -51,7 +55,7 @@ def get_partition_file_name(otp):
             line.startswith('CONFIG_PARTITION_TABLE_CUSTOM_FILENAME') or
             line.startswith('CONFIG_PARTITION_TABLE_FILENAME')
         ):
-            return line.split('=', 1)[-1]
+            return line.split('=', 1)[-1].replace('"', '')
 
 
 class Partition:
@@ -65,6 +69,7 @@ class Partition:
 
     def set_app_size(self, size):
         next_offset = 0
+        app_size = 0
 
         for i, part in enumerate(self.csv_data):
             if next_offset == 0:
@@ -74,8 +79,11 @@ class Partition:
                 part[3] = next_offset
 
             if part[1] == 'app':
-                factor = (part[4] + size) / 100.0 + 1
-                part[4] = int(factor * 100)
+                factor = ((part[4] + size) / 4096.0) + 1
+                part[4] = int(int(factor) * 4096)
+                app_size += part[4]
+            elif app_size != 0:
+                part[4] = self.total_space - next_offset
 
             next_offset += part[4]
 
@@ -98,6 +106,7 @@ class Partition:
 
         with open(self.file_path, 'w') as f:
             f.write('\n'.join(otp))
+            f.write('\n')
 
     def read_csv(self):
         with open(self.file_path, 'r') as f:
@@ -167,6 +176,8 @@ else:
 
 
 def spawn(cmd):
+
+    print(' '.join(cmd))
     if sys.platform.startswith('win'):
         p = subprocess.Popen(
             cmd,
@@ -250,30 +261,17 @@ if target.lower() == 'esp32':
         with open(esp32_common_path, 'w') as f:
             f.write(data1)
 
-    partition_file_names = [
-        'partitions-32MiB.csv',
-        'partitions-32MiB-ota.csv',
-        'partitions-16MiB-ota.csv',
-        'partitions-16MiB.csv',
-        'partitions-8MiB.csv',
-        'partitions-4MiB-ota.csv',
-        'partitions-2MiB.csv',
-        'partitions-4MiB.csv',
-    ]
-
-    base_path = os.path.join('ports', 'esp32')
-
     partition_file_names = {
-        name: os.path.join(base_path, name) for name in partition_file_names
+        'partitions-32MiB.csv': 'ports/esp32/partitions-32MiB.csv',
+        'partitions-32MiB-ota.csv': 'ports/esp32/partitions-32MiB-ota.csv',
+        'partitions-16MiB-ota.csv': 'ports/esp32/partitions-16MiB-ota.csv',
+        'partitions-16MiB.csv': 'ports/esp32/partitions-16MiB.csv',
+        'partitions-8MiB.csv': 'ports/esp32/partitions-8MiB.csv',
+        'partitions-4MiB-ota.csv': 'ports/esp32/partitions-4MiB-ota.csv',
+        'partitions-2MiB.csv': 'ports/esp32/partitions-2MiB.csv',
+        'partitions-4MiB.csv': 'ports/esp32/partitions-4MiB.csv',
+        'partitions-app3M_fat9M_fact512k_16MiB.csv': 'ports/esp32/boards/ARDUINO_NANO_ESP32/partitions-app3M_fat9M_fact512k_16MiB.csv'
     }
-    partition_file_names['partitions-app3M_fat9M_fact512k_16MiB.csv'] = (
-        os.path.join(
-            base_path,
-            'boards',
-            'ARDUINO_NANO_ESP32',
-            'partitions-app3M_fat9M_fact512k_16MiB.csv'
-        )
-    )
 
     return_code, output = spawn(compile_cmd)
     if return_code != 0:
@@ -281,11 +279,7 @@ if target.lower() == 'esp32':
         if 'partition is too small ' not in output:
             sys.exit(return_code)
 
-        end = output.split(
-            ' partition is too small for binary '
-            'micropython.bin size (overflow ',
-            1
-        )[-1]
+        end = output.split('(overflow ', 1)[-1]
         overflow_amount = int(end.split(')', 1)[0], 16)
 
         partition_file_name = get_partition_file_name(output)
