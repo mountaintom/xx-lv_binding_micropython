@@ -5,7 +5,7 @@ import subprocess
 from argparse import ArgumentParser
 
 
-SCRIPT_DIR = os.path.dirname(sys.argv[0])
+SCRIPT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
 MPY_DIR = os.path.join(SCRIPT_DIR, 'micropython')
 
 args = list(sys.argv[1:])
@@ -130,51 +130,6 @@ class Partition:
         return csv_data
 
 
-if target == 'unix':
-    mpy_cross_cmd = []
-    clean_cmd = ['make', 'clean', '-C', f'ports/{target}'] + extra_args
-    compile_cmd = ['make', '-C', f'ports/{target}'] + extra_args
-    submodules_cmd = ['make', 'submodules', '-C', f'ports/{target}'] + extra_args
-elif target == 'windows':
-    if sys.platform.startswith('win'):
-        try:
-            import pyMSVC
-
-            env = pyMSVC.setup_environment()
-            print(env)
-        except ImportError:
-            pass
-
-        mpy_cross_cmd = ['msbuild', 'mpy-cross/mpy-cross.vcxproj']
-        clean_cmd = []
-        compile_cmd = ['msbuild'] + extra_args + [f'ports/{target}/micropython.vcxproj']
-        submodules_cmd = []
-    else:
-        mpy_cross_cmd = ['make', '-C', 'mpy-cross']
-        clean_cmd = ['make', 'clean', '-C', f'ports/{target}'] + extra_args
-        compile_cmd = ['make', '-C', f'ports/{target}'] + extra_args
-        submodules_cmd = []
-else:
-    mpy_cross_cmd = ['make', '-C', 'mpy-cross']
-    clean_cmd = ['make', 'clean', '-C', f'ports/{target}'] + extra_args
-    compile_cmd = ['make', '-C', f'ports/{target}'] + extra_args
-    submodules_cmd = ['make', 'submodules', '-C', f'ports/{target}'] + extra_args
-
-
-if target == 'esp32':
-    clean_cmd.append('USER_C_MODULES=../../../../micropython.cmake')
-    compile_cmd.append('USER_C_MODULES=../../../../micropython.cmake')
-    submodules_cmd.append('USER_C_MODULES=../../../../micropython.cmake')
-else:
-    if clean_cmd:
-        clean_cmd.append('USER_C_MODULES=../../../micropython.cmake')
-
-    if submodules_cmd:
-        submodules_cmd.append('USER_C_MODULES=../../../micropython.cmake')
-
-    compile_cmd.append('USER_C_MODULES=../../../micropython.cmake')
-
-
 def spawn(cmd):
 
     print(' '.join(cmd))
@@ -225,25 +180,124 @@ def spawn(cmd):
     return p.returncode, output_buffer
 
 
-if args.mpy_cross:
-    return_code, _ = spawn(mpy_cross_cmd)
-    if return_code != 0:
-        sys.exit(return_code)
+if target.lower() == 'unix':
+    unix_port_path = os.path.join(
+        MPY_DIR,
+        'ports',
+        'unix'
+    )
+    os.chdir(unix_port_path)
 
-if args.submodules:
-    return_code, _ = spawn(submodules_cmd)
-    if return_code != 0:
-        sys.exit(return_code)
+    clean_cmd = (
+        ['make', 'clean'] +
+        extra_args +
+        [
+            'LV_CFLAGS="-DMICROPY_SDL=1"',
+            'USER_C_MODULES=../../../make_build'
+        ]
+    )
+    compile_cmd = (
+        ['make'] +
+        extra_args +
+        [
+            'LV_CFLAGS="-DMICROPY_SDL=1"',
+            'USER_C_MODULES=../../../make_build'
+        ]
+    )
+    submodules_cmd = (
+        ['make', 'submodules'] +
+        extra_args +
+        [
+            'LV_CFLAGS="-DMICROPY_SDL=1"',
+            'USER_C_MODULES=../../../make_build'
+        ]
+    )
+    mpy_cross_cmd = []
+
+elif target.lower() == 'windows':
+    if sys.platform.startswith('win'):
+        try:
+            import pyMSVC
+
+            env = pyMSVC.setup_environment()
+            print(env)
+        except ImportError:
+            pass
+
+        mpy_cross_cmd = ['msbuild', 'mpy-cross/mpy-cross.vcxproj']
+        clean_cmd = []
+        compile_cmd = (
+            ['msbuild'] +
+            extra_args +
+            [f'ports/{target}/micropython.vcxproj']
+        )
+        submodules_cmd = []
+    else:
+        mpy_cross_cmd = ['make', '-C', 'mpy-cross']
+        clean_cmd = (
+            ['make', 'clean', '-C', f'ports/{target}'] +
+            extra_args +
+            ['USER_C_MODULES=../../../micropython.cmake']
+        )
+        compile_cmd = (
+            ['make', '-C', f'ports/{target}'] +
+            extra_args +
+            ['USER_C_MODULES=../../../micropython.cmake']
+        )
+        submodules_cmd = []
+
+elif target.lower() == 'esp32':
+    mpy_cross_cmd = ['make', '-C', 'mpy-cross']
+    clean_cmd = (
+        ['make', 'clean', '-C', f'ports/{target}'] +
+        extra_args +
+        ['USER_C_MODULES=../../../../micropython.cmake']
+    )
+    compile_cmd = (
+        ['make', '-C', f'ports/{target}'] +
+        extra_args +
+        ['USER_C_MODULES=../../../../micropython.cmake']
+    )
+    submodules_cmd = (
+        ['make', 'submodules', '-C', f'ports/{target}'] +
+        extra_args +
+        ['USER_C_MODULES=../../../../micropython.cmake']
+    )
+else:
+    mpy_cross_cmd = ['make', '-C', 'mpy-cross']
+    clean_cmd = (
+        ['make', 'clean', '-C', f'ports/{target}'] +
+        extra_args +
+        ['USER_C_MODULES=../../../micropython.cmake']
+    )
+    compile_cmd = (
+        ['make', '-C', f'ports/{target}'] +
+        extra_args +
+        ['USER_C_MODULES=../../../micropython.cmake']
+    )
+    submodules_cmd = (
+        ['make', 'submodules', '-C', f'ports/{target}'] +
+        extra_args +
+        ['USER_C_MODULES=../../../micropython.cmake']
+    )
 
 
-if args.clean:
-    spawn(clean_cmd)
+def run_additional_commands():
+    if args.mpy_cross and mpy_cross_cmd:
+        return_code, _ = spawn(mpy_cross_cmd)
+        if return_code != 0:
+            sys.exit(return_code)
+
+    if args.submodules and submodules_cmd:
+        return_code, _ = spawn(submodules_cmd)
+        if return_code != 0:
+            sys.exit(return_code)
+
+    if args.clean and clean_cmd:
+        spawn(clean_cmd)
 
 
-if target.lower() == 'esp32':
-    'make.py esp32 mpy_cross submodules BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
-    'make.py esp32 BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL'
-
+def run_esp32():
     esp32_common_path = os.path.join(
         'ports',
         'esp32',
@@ -270,14 +324,18 @@ if target.lower() == 'esp32':
         'partitions-4MiB-ota.csv': 'ports/esp32/partitions-4MiB-ota.csv',
         'partitions-2MiB.csv': 'ports/esp32/partitions-2MiB.csv',
         'partitions-4MiB.csv': 'ports/esp32/partitions-4MiB.csv',
-        'partitions-app3M_fat9M_fact512k_16MiB.csv': 'ports/esp32/boards/ARDUINO_NANO_ESP32/partitions-app3M_fat9M_fact512k_16MiB.csv'
+        'partitions-app3M_fat9M_fact512k_16MiB.csv': (
+            'ports/esp32/boards/ARDUINO_NANO_ESP32/partitions-'
+            'app3M_fat9M_fact512k_16MiB.csv'
+        )
     }
 
-    return_code, output = spawn(compile_cmd)
-    if return_code != 0:
+    ret_code, output = spawn(compile_cmd)
+    if ret_code != 0:
         output = ''.join(output)
+
         if 'partition is too small ' not in output:
-            sys.exit(return_code)
+            sys.exit(ret_code)
 
         end = output.split('(overflow ', 1)[-1]
         overflow_amount = int(end.split(')', 1)[0], 16)
@@ -294,11 +352,56 @@ if target.lower() == 'esp32':
         partition.save()
 
         spawn(clean_cmd)
-        return_code, _ = spawn(compile_cmd)
-        if return_code != 0:
-            sys.exit(return_code)
+        ret_code, _ = spawn(compile_cmd)
 
-else:
-    return_code, _ = spawn(compile_cmd)
-    if return_code != 0:
-        sys.exit(return_code)
+        if ret_code != 0:
+            sys.exit(ret_code)
+
+
+def run_unix():
+    new_data = [
+        '',
+        f"freeze('{SCRIPT_DIR}/driver/linux', 'evdev.py')",
+        f"freeze('{SCRIPT_DIR}/driver/linux', 'lv_timer.py')",
+        f"freeze('{SCRIPT_DIR}/lib', 'display_driver_utils.py')",
+        f"freeze('{SCRIPT_DIR}/lib', 'display_driver.py')",
+        f"freeze('{SCRIPT_DIR}/lib', 'fs_driver.py')",
+        f"freeze('{SCRIPT_DIR}/lib', 'lv_utils.py')",
+        ''
+    ]
+    manifest_path = os.path.join(
+        MPY_DIR,
+        'ports',
+        'unix',
+        'variants',
+        'manifest.py'
+    )
+
+    with open(manifest_path, 'r') as f:
+        manifest = f.read().split('\n')
+
+    if len(manifest) < 6:
+        manifest.extend(new_data)
+        with open(manifest_path, 'w') as f:
+            f.write('\n'.join(manifest))
+
+    ret_code, _ = spawn(compile_cmd)
+    if ret_code != 0:
+        sys.exit(ret_code)
+
+
+def run_other():
+    ret_code, _ = spawn(compile_cmd)
+    if ret_code != 0:
+        sys.exit(ret_code)
+
+
+if __name__ == '__main__':
+    run_additional_commands()
+
+    if target.lower() == 'esp32':
+        run_esp32()
+    elif target.lower() == 'unix':
+        run_unix()
+    else:
+        run_other()

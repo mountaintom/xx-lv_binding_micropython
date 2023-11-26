@@ -16,9 +16,6 @@ from itertools import chain
 from functools import lru_cache
 import json
 
-import pycparser
-
-
 def memoize(func):
     @lru_cache(maxsize=1000000)
     def memoized(*args, **kwargs):
@@ -43,6 +40,7 @@ from os.path import commonprefix
 script_path = dirname(abspath(__file__))
 sys.path.insert(0, '%s/../pycparser' % script_path)
 from pycparser import c_parser, c_ast, c_generator
+import pycparser
 
 
 fake_libc_path = os.path.join(script_path, 'fake_libc')
