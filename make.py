@@ -181,35 +181,28 @@ def spawn(cmd):
 
 
 if target.lower() == 'unix':
-    unix_port_path = os.path.join(
-        MPY_DIR,
-        'ports',
-        'unix'
-    )
-    os.chdir(unix_port_path)
-
     clean_cmd = (
-        ['make', 'clean'] +
+        ['make', '-C', 'ports/unix', 'clean'] +
         extra_args +
         [
             'LV_CFLAGS="-DMICROPY_SDL=1"',
-            'USER_C_MODULES=../../../make_build'
+            f'USER_C_MODULES={SCRIPT_DIR}/make_build'
         ]
     )
     compile_cmd = (
-        ['make'] +
+        ['make', '-C', 'ports/unix'] +
         extra_args +
         [
             'LV_CFLAGS="-DMICROPY_SDL=1"',
-            'USER_C_MODULES=../../../make_build'
+            f'USER_C_MODULES={SCRIPT_DIR}/make_build'
         ]
     )
     submodules_cmd = (
-        ['make', 'submodules'] +
+        ['make', '-C', 'ports/unix', 'submodules'] +
         extra_args +
         [
             'LV_CFLAGS="-DMICROPY_SDL=1"',
-            'USER_C_MODULES=../../../make_build'
+            f'USER_C_MODULES={SCRIPT_DIR}/make_build'
         ]
     )
     mpy_cross_cmd = []
