@@ -10,7 +10,7 @@ This is an expermental build system. Quick brief on how to use.
 Python needs to be used for the ESP32 all others you can use Python to build
 or you can use the traditional way with one change. The user c module location
 has changed. Micropython is no longer the parent and the binding a submodule.
-It is now the other way around. So you have to run `git submodules init`
+It is now the other way around. So you have to run `git submodules update --init`
 to pull in the submodules. To point the build system to the user c module add 
 `USER_C_MODULE=../../micropython.cmake`.
 
@@ -23,7 +23,7 @@ If you decide to use the python build system it works as follows.
 
 as an example
 
-`make.py esp32 BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
+`make.py esp32 BOARD=ESP32_GENERIC_S3 BOARD_VARIANT=SPIRAM_OCTAL`
 
 You do not need to add the USER_C_MODULES this is done for you automatically.
 
@@ -33,11 +33,11 @@ You have to specifically state what you want to do just like with make. so if yo
 
 `make.py esp32 -submodules`
 
-`make.py esp32 -clean BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
+`make.py esp32 -clean BOARD=ESP32_GENERIC_S3 BOARD_VARIANT=SPIRAM_OCTAL`
 
 or you can daisy chain them
 
-`make.py esp32 -mpy_cross -submodules -clean BOARD=ESP32_GENERIC_S3 MICROPY_BOARD_VARIANT=SPIRAM_OCTAL`
+`make.py esp32 -mpy_cross -submodules -clean BOARD=ESP32_GENERIC_S3 BOARD_VARIANT=SPIRAM_OCTAL`
 
 With the ESP32 if the firmware is not able to fit correctly into the application partition
 the script will automatically make the changes needed to get it to fit. This is only going to work
