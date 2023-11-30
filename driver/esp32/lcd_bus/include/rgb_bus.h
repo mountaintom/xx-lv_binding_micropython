@@ -1,7 +1,6 @@
 
 #include "mphalport.h"
 #include "py/obj.h"
-
 #include "esp_lcd_panel_io.h"
 
 
@@ -16,12 +15,24 @@ typedef struct _mp_lcd_rgb_bus_obj_t {
     mp_obj_t callback;
     mp_obj_t user_ctx;
 
-    esp_lcd_panel_handle_t panel_io_handle;
+    int buffer_size;
+    bool fb_in_psram;
+    bool use_dma;
+
+    uint8_t *buf1;
+    uint8_t *buf2;
 
 #if SOC_LCD_RGB_SUPPORTED
+    esp_lcd_panel_handle_t panel_io_handle;
     esp_lcd_rgb_panel_config_t panel_io_config;
     esp_lcd_rgb_timing_t bus_config;
+#else
+    esp_lcd_panel_io_handle_t panel_io_handle;
+    void *panel_io_config;
+    void *bus_config;
 #endif /*SOC_LCD_RGB_SUPPORTED*/
+
+    void* bus_handle;
 
 } mp_lcd_rgb_bus_obj_t;
 

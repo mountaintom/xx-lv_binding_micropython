@@ -12,19 +12,20 @@ typedef struct _mp_lcd_spi_bus_obj_t {
     mp_obj_t callback;
     mp_obj_t user_ctx;
 
-    esp_lcd_panel_io_spi_config_t panel_io_config;
-    esp_lcd_panel_io_handle_t panel_io_handle;
-
-    spi_bus_config_t bus_config;
-    esp_lcd_spi_bus_handle_t bus_handle;
-
     int buffer_size;
     bool fb_in_psram;
     bool use_dma;
 
     uint8_t *buf1;
     uint8_t *buf2;
-    uint8_t host;
+
+    esp_lcd_panel_io_handle_t panel_io_handle;
+    esp_lcd_panel_io_spi_config_t panel_io_config;
+    spi_bus_config_t bus_config;
+    esp_lcd_spi_bus_handle_t bus_handle;
+
+    int host;
+
 
 } mp_lcd_spi_bus_obj_t;
 

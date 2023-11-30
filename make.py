@@ -154,19 +154,21 @@ def spawn(cmd):
         p.stdin.write(cmd.encode('utf-8'))
         p.stdin.close()
 
-    output_buffer = []
+    output_buffer = ''
     while p.poll() is None:
-        for line in iter(p.stdout.readline, b''):
-            if line != b'':
-                sys.stdout.write(line.decode('utf-8'))
-                sys.stdout.flush()
-                output_buffer.append(line.decode('utf-8'))
+        char = p.stdout.read(1)
+        while char != b'':
+            sys.stdout.write(char.decode('utf-8'))
+            sys.stdout.flush()
+            output_buffer += char.decode('utf-8')
+            char = p.stdout.read(1)
 
-        for line in iter(p.stderr.readline, b''):
-            if line != b'':
-                sys.stderr.write(line.decode('utf-8'))
-                sys.stderr.flush()
-                output_buffer.append(line.decode('utf-8'))
+        char = p.stderr.read(1)
+        while char != b'':
+            sys.stderr.write(char.decode('utf-8'))
+            sys.stderr.flush()
+            output_buffer += char.decode('utf-8')
+            char = p.stderr.read(1)
 
     if not p.stdout.closed:
         p.stdout.close()
@@ -181,30 +183,40 @@ def spawn(cmd):
 
 
 if target.lower() == 'unix':
-    clean_cmd = (
-        ['make', '-C', 'ports/unix', 'clean'] +
-        extra_args +
-        [
-            'LV_CFLAGS="-DMICROPY_SDL=1"',
-            f'USER_C_MODULES={SCRIPT_DIR}/make_build'
-        ]
-    )
-    compile_cmd = (
-        ['make', '-C', 'ports/unix'] +
-        extra_args +
-        [
-            'LV_CFLAGS="-DMICROPY_SDL=1"',
-            f'USER_C_MODULES={SCRIPT_DIR}/make_build'
-        ]
-    )
-    submodules_cmd = (
-        ['make', '-C', 'ports/unix', 'submodules'] +
-        extra_args +
-        [
-            'LV_CFLAGS="-DMICROPY_SDL=1"',
-            f'USER_C_MODULES={SCRIPT_DIR}/make_build'
-        ]
-    )
+    for i, arg in enumerate(extra_args):
+        if arg.startswith('LV_CFLAGS'):
+            LV_CFLAGS = arg.split('=', 1)[-1].replace('"', '')
+            LV_CFLAGS += ' -DMICROPY_SDL=1'
+            extra_args.pop(i)
+            break
+    else:
+        LV_CFLAGS = '-DMICROPY_SDL=1'
+
+    clean_cmd = [
+        'make',
+        '-C',
+        'ports/unix',
+        'clean',
+        f'LV_CFLAGS="{LV_CFLAGS}"',
+        f'USER_C_MODULES={SCRIPT_DIR}/make_build'
+    ] + extra_args
+
+    compile_cmd = [
+        'make',
+        '-C',
+        'ports/unix',
+        f'LV_CFLAGS="{LV_CFLAGS}"',
+        f'USER_C_MODULES={SCRIPT_DIR}/make_build'
+    ] + extra_args
+
+    submodules_cmd = [
+        'make',
+        '-C',
+        'ports/unix',
+        'submodules',
+        f'USER_C_MODULES={SCRIPT_DIR}/make_build'
+    ] + extra_args
+
     mpy_cross_cmd = []
 
 elif target.lower() == 'windows':
@@ -220,59 +232,80 @@ elif target.lower() == 'windows':
         mpy_cross_cmd = ['msbuild', 'mpy-cross/mpy-cross.vcxproj']
         clean_cmd = []
         compile_cmd = (
-            ['msbuild'] +
-            extra_args +
-            [f'ports/{target}/micropython.vcxproj']
+            [
+                'msbuild',
+                f'ports/{target}/micropython.vcxproj',
+                f'USER_C_MODULES=={SCRIPT_DIR}/make_build'
+            ] + extra_args
         )
         submodules_cmd = []
     else:
         mpy_cross_cmd = ['make', '-C', 'mpy-cross']
-        clean_cmd = (
-            ['make', 'clean', '-C', f'ports/{target}'] +
-            extra_args +
-            ['USER_C_MODULES=../../../micropython.cmake']
-        )
-        compile_cmd = (
-            ['make', '-C', f'ports/{target}'] +
-            extra_args +
-            ['USER_C_MODULES=../../../micropython.cmake']
-        )
+        clean_cmd = [
+            'make',
+            'clean',
+            '-C',
+            f'ports/{target}'
+            'USER_C_MODULES=../../../micropython.cmake'
+        ] + extra_args
+
+        compile_cmd = [
+            'make',
+            '-C',
+            f'ports/{target}',
+            'USER_C_MODULES=../../../micropython.cmake'
+        ] + extra_args
+
         submodules_cmd = []
 
 elif target.lower() == 'esp32':
     mpy_cross_cmd = ['make', '-C', 'mpy-cross']
-    clean_cmd = (
-        ['make', 'clean', '-C', f'ports/{target}'] +
-        extra_args +
-        ['USER_C_MODULES=../../../../micropython.cmake']
-    )
-    compile_cmd = (
-        ['make', '-C', f'ports/{target}'] +
-        extra_args +
-        ['USER_C_MODULES=../../../../micropython.cmake']
-    )
-    submodules_cmd = (
-        ['make', 'submodules', '-C', f'ports/{target}'] +
-        extra_args +
-        ['USER_C_MODULES=../../../../micropython.cmake']
-    )
+    clean_cmd = [
+        'make',
+        'clean',
+        '-C',
+        f'ports/{target}',
+        'USER_C_MODULES=../../../../micropython.cmake'
+    ] + extra_args
+
+    compile_cmd = [
+        'make',
+        '-C',
+        f'ports/{target}',
+        'USER_C_MODULES=../../../../micropython.cmake'
+    ] + extra_args
+    submodules_cmd = [
+        'make',
+        'submodules',
+        '-C',
+        f'ports/{target}',
+        'USER_C_MODULES=../../../../micropython.cmake'
+    ] + extra_args
+
 else:
     mpy_cross_cmd = ['make', '-C', 'mpy-cross']
-    clean_cmd = (
-        ['make', 'clean', '-C', f'ports/{target}'] +
-        extra_args +
-        ['USER_C_MODULES=../../../micropython.cmake']
-    )
-    compile_cmd = (
-        ['make', '-C', f'ports/{target}'] +
-        extra_args +
-        ['USER_C_MODULES=../../../micropython.cmake']
-    )
-    submodules_cmd = (
-        ['make', 'submodules', '-C', f'ports/{target}'] +
-        extra_args +
-        ['USER_C_MODULES=../../../micropython.cmake']
-    )
+    clean_cmd = [
+        'make',
+        'clean',
+        '-C',
+        f'ports/{target}',
+        f'USER_C_MODULES=={SCRIPT_DIR}/make_build'
+    ] + extra_args
+
+    compile_cmd = [
+        'make',
+        '-C',
+        f'ports/{target}',
+        f'USER_C_MODULES=={SCRIPT_DIR}/make_build'
+    ] + extra_args
+
+    submodules_cmd = [
+        'make',
+        'submodules',
+        '-C',
+        f'ports/{target}',
+        f'USER_C_MODULES=={SCRIPT_DIR}/make_build'
+    ] + extra_args
 
 
 def run_additional_commands():
@@ -291,6 +324,29 @@ def run_additional_commands():
 
 
 def run_esp32():
+    new_data = [
+        '',
+        f"freeze('{SCRIPT_DIR}/driver/common', 'display_driver_framework.py')",
+        f"freeze('{SCRIPT_DIR}/driver/common', 'fs_driver.py')",
+        f"freeze('{SCRIPT_DIR}/utils', 'lv_utils.py')",
+        ''
+    ]
+    manifest_path = os.path.join(
+        MPY_DIR,
+        'ports',
+        'esp32',
+        'boards',
+        'manifest.py'
+    )
+
+    with open(manifest_path, 'r') as f:
+        manifest = f.read().split('\n')
+
+    if len(manifest) < 17:
+        manifest.extend(new_data)
+        with open(manifest_path, 'w') as f:
+            f.write('\n'.join(manifest))
+
     esp32_common_path = os.path.join(
         'ports',
         'esp32',
@@ -325,8 +381,6 @@ def run_esp32():
 
     ret_code, output = spawn(compile_cmd)
     if ret_code != 0:
-        output = ''.join(output)
-
         if 'partition is too small ' not in output:
             sys.exit(ret_code)
 
@@ -345,21 +399,37 @@ def run_esp32():
         partition.save()
 
         spawn(clean_cmd)
-        ret_code, _ = spawn(compile_cmd)
+        ret_code, output = spawn(compile_cmd)
 
         if ret_code != 0:
             sys.exit(ret_code)
+
+    if 'Running cmake in directory ' in output:
+        build_path = output.split('Running cmake in directory ', 1)[-1]
+    else:
+        build_path = output.split('Running ninja in directory ', 1)[-1]
+
+    build_path = build_path.split('\n', 1)[0]
+
+    for arg in extra_args:
+        if arg.startswith('BOARD='):
+            print()
+            print('COMPILED BINARIES')
+            print(f'  BOOTLOADER:  {build_path}/bootloader/bootloader.bin')
+            print(f'  FIRMWARE:    {build_path}/firmware.bin')
+            print(f'  MICROPYTHON: {build_path}/micropython.bin')
 
 
 def run_unix():
     new_data = [
         '',
+        f"freeze('{SCRIPT_DIR}/driver/common', 'display_driver_framework.py')",
         f"freeze('{SCRIPT_DIR}/driver/linux', 'evdev.py')",
         f"freeze('{SCRIPT_DIR}/driver/linux', 'lv_timer.py')",
-        f"freeze('{SCRIPT_DIR}/lib', 'display_driver_utils.py')",
-        f"freeze('{SCRIPT_DIR}/lib', 'display_driver.py')",
-        f"freeze('{SCRIPT_DIR}/lib', 'fs_driver.py')",
-        f"freeze('{SCRIPT_DIR}/lib', 'lv_utils.py')",
+        f"freeze('{SCRIPT_DIR}/driver/linux', 'display_driver_utils.py')",
+        f"freeze('{SCRIPT_DIR}/driver/linux', 'display_driver.py')",
+        f"freeze('{SCRIPT_DIR}/driver/common', 'fs_driver.py')",
+        f"freeze('{SCRIPT_DIR}/utils', 'lv_utils.py')",
         ''
     ]
     manifest_path = os.path.join(
@@ -381,6 +451,9 @@ def run_unix():
     ret_code, _ = spawn(compile_cmd)
     if ret_code != 0:
         sys.exit(ret_code)
+
+    print()
+    print(f'COMPILED BINARY: {SCRIPT_DIR}/micropython/ports/unix/build-standard/micropython')
 
 
 def run_other():

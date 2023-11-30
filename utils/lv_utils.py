@@ -32,7 +32,7 @@
 
 import lvgl as lv
 import micropython
-import usys
+import sys
 
 # Try standard machine.Timer, or custom timer from lv_timer, if available
 
@@ -47,29 +47,37 @@ except:
 # Try to determine default timer id
 
 default_timer_id = 0
-if usys.platform == 'pyboard':
+if sys.platform == 'pyboard':
     # stm32 only supports SW timer -1
     default_timer_id = -1
     
-if usys.platform == 'rp2':
+if sys.platform == 'rp2':
     # rp2 only supports SW timer -1
     default_timer_id = -1
 
 # Try importing uasyncio, if available
 
 try:
-    import uasyncio
-    uasyncio_available = True
+    import asyncio
+    asyncio_available = True
 except:
-    uasyncio_available = False
+    asyncio_available = False
+
 
 ##############################################################################
 
-class event_loop():
-
+class event_loop:
     _current_instance = None
 
-    def __init__(self, freq=25, timer_id=default_timer_id, max_scheduled=2, refresh_cb=None, asynchronous=False, exception_sink=None):
+    def __init__(
+        self,
+        freq=25,
+        timer_id=default_timer_id,
+        max_scheduled=2,
+        refresh_cb=None,
+        asynchronous=False,
+        exception_sink=None
+    ):
         if self.is_running():
             raise RuntimeError("Event loop is already running!")
 
@@ -80,19 +88,29 @@ class event_loop():
 
         self.delay = 1000 // freq
         self.refresh_cb = refresh_cb
-        self.exception_sink = exception_sink if exception_sink else self.default_exception_sink
+        self.exception_sink = (
+            exception_sink if exception_sink else self.default_exception_sink
+        )
 
         self.asynchronous = asynchronous
         if self.asynchronous:
-            if not uasyncio_available:
-                raise RuntimeError("Cannot run asynchronous event loop. uasyncio is not available!")
-            self.refresh_event = uasyncio.Event()
-            self.refresh_task = uasyncio.create_task(self.async_refresh())
-            self.timer_task = uasyncio.create_task(self.async_timer())
+            if not asyncio_available:
+                raise RuntimeError(
+                    "Cannot run asynchronous event loop. "
+                    "uasyncio is not available!"
+                )
+
+            self.refresh_event = asyncio.Event()
+            self.refresh_task = asyncio.create_task(self.async_refresh())
+            self.timer_task = asyncio.create_task(self.async_timer())
         else:
             self.timer = Timer(timer_id)
             self.task_handler_ref = self.task_handler  # Allocation occurs here
-            self.timer.init(mode=Timer.PERIODIC, period=self.delay, callback=self.timer_cb)
+            self.timer.init(
+                mode=Timer.PERIODIC,
+                period=self.delay,
+                callback=self.timer_cb
+            )
             self.max_scheduled = max_scheduled
             self.scheduled = 0
 
@@ -122,7 +140,10 @@ class event_loop():
         try:
             if lv._nesting.value == 0:
                 lv.task_handler()
-                if self.refresh_cb: self.refresh_cb()
+
+                if self.refresh_cb:
+                    self.refresh_cb()
+
             self.scheduled -= 1
         except Exception as e:
             if self.exception_sink:
@@ -130,7 +151,8 @@ class event_loop():
 
     def timer_cb(self, t):
         # Can be called in Interrupt context
-        # Use task_handler_ref since passing self.task_handler would cause allocation.
+        # Use task_handler_ref since passing self.task_handler
+        # would cause allocation.
         lv.tick_inc(self.delay)
         if self.scheduled < self.max_scheduled:
             try:
@@ -153,11 +175,10 @@ class event_loop():
 
     async def async_timer(self):
         while True:
-            await uasyncio.sleep_ms(self.delay)
+            await asyncio.sleep_ms(self.delay)
             lv.tick_inc(self.delay)
             self.refresh_event.set()
-            
 
     def default_exception_sink(self, e):
-        usys.print_exception(e)
+        sys.print_exception(e)
         event_loop.current_instance().deinit()

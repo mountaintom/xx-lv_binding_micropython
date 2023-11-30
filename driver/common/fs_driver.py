@@ -3,9 +3,9 @@ Original author: mhepp(https://forum.lvgl.io/u/mhepp/summary)
 '''
 
 import lvgl as lv
-import ustruct as struct
+import struct
 
-def fs_open_cb(drv, path, mode):
+def _fs_open_cb(drv, path, mode):
 
     if mode == lv.FS_MODE.WR:
         p_mode = 'wb'
@@ -25,7 +25,7 @@ def fs_open_cb(drv, path, mode):
     return {'file' : f, 'path': path}
 
 
-def fs_close_cb(drv, fs_file):
+def _fs_close_cb(drv, fs_file):
     try:
         fs_file.__cast__()['file'].close()
     except OSError as e:
@@ -34,7 +34,7 @@ def fs_close_cb(drv, fs_file):
     return lv.FS_RES.OK
 
 
-def fs_read_cb(drv, fs_file, buf, btr, br):
+def _fs_read_cb(drv, fs_file, buf, btr, br):
     try:
         tmp_data = fs_file.__cast__()['file'].read(btr)
         buf.__dereference__(btr)[0:len(tmp_data)] = tmp_data
@@ -45,7 +45,7 @@ def fs_read_cb(drv, fs_file, buf, btr, br):
     return lv.FS_RES.OK
 
 
-def fs_seek_cb(drv, fs_file, pos, whence):
+def _fs_seek_cb(drv, fs_file, pos, whence):
     try:
         fs_file.__cast__()['file'].seek(pos, whence)
     except OSError as e:
@@ -54,7 +54,7 @@ def fs_seek_cb(drv, fs_file, pos, whence):
     return lv.FS_RES.OK
 
 
-def fs_tell_cb(drv, fs_file, pos):
+def _fs_tell_cb(drv, fs_file, pos):
     try:
         tpos = fs_file.__cast__()['file'].tell()
         pos.__dereference__(4)[0:4] = struct.pack("<L", tpos)
@@ -64,7 +64,7 @@ def fs_tell_cb(drv, fs_file, pos):
     return lv.FS_RES.OK
 
 
-def fs_write_cb(drv, fs_file, buf, btw, bw):
+def _fs_write_cb(drv, fs_file, buf, btw, bw):
     try:
         wr = fs_file.__cast__()['file'].write(buf.__dereference__(btw)[0:btw])
         bw.__dereference__(4)[0:4] = struct.pack("<L", wr)
@@ -78,12 +78,12 @@ def fs_register(fs_drv, letter, cache_size=500):
 
     fs_drv.init()
     fs_drv.letter = ord(letter)
-    fs_drv.open_cb = fs_open_cb
-    fs_drv.read_cb = fs_read_cb
-    fs_drv.write_cb = fs_write_cb
-    fs_drv.seek_cb = fs_seek_cb
-    fs_drv.tell_cb = fs_tell_cb
-    fs_drv.close_cb = fs_close_cb
+    fs_drv.open_cb = _fs_open_cb
+    fs_drv.read_cb = _fs_read_cb
+    fs_drv.write_cb = _fs_write_cb
+    fs_drv.seek_cb = _fs_seek_cb
+    fs_drv.tell_cb = _fs_tell_cb
+    fs_drv.close_cb = _fs_close_cb
 
     if cache_size >= 0:
         fs_drv.cache_size = cache_size

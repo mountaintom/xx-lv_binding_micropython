@@ -1,13 +1,46 @@
 
-#include "../include/bus_common.h"
+#include "../include/modlcd_bus.h"
 #include "../include/spi_bus.h"
 #include "../include/i2c_bus.h"
 #include "../include/i80_bus.h"
 #include "../include/rgb_bus.h"
 
+#include "esp_lcd_panel_io.h"
+#include "esp_heap_caps.h"
 #include "esp_lcd_types.h"
 
+#include "mphalport.h"
 #include "py/obj.h"
+#include "py/runtime.h"
+\
+
+bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
+{
+    mp_lcd_bus_obj_t *bus_obj = (mp_lcd_bus_obj_t *)user_ctx;
+    if (bus_obj->callback != mp_const_none) {
+        mp_sched_schedule(bus_obj->callback, bus_obj->user_ctx);
+        mp_hal_wake_main_task_from_isr();
+    }
+    return false;
+}
+
+void allocate_buffers(mp_lcd_bus_obj_t *self) {
+    uint32_t mem_cap = 0;
+
+    if (self->fb_in_psram) {
+        mem_cap |= MALLOC_CAP_SPIRAM;
+    } else {
+        mem_cap |= MALLOC_CAP_INTERNAL;
+    }
+
+    if (self->use_dma) {
+        mem_cap |= MALLOC_CAP_DMA;
+        self->buf1 = (uint8_t *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        self->buf2 = (uint8_t *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+    } else {
+        self->buf1 = (uint8_t *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+    }
+}
 
 
 STATIC const mp_map_elem_t mp_module_lcd_bus_globals_table[] = {
