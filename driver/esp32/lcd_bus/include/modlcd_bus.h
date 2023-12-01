@@ -170,15 +170,22 @@ STATIC mp_obj_t mp_lcd_bus_get_frame_buffer(size_t n_args, const mp_obj_t *pos_a
     mp_lcd_bus_obj_t *self = (mp_lcd_bus_obj_t *)args[ARG_self].u_obj;
     int buf_num = args[ARG_buffer_number].u_int;
 
+    mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL}
+
     if (buf_num == 1) {
-        return mp_obj_new_memoryview('B', self->buffer_size, self->buf1);
+        if (self->buf1 == NULL) {
+            return mp_const_none;
+        }
+        ar.items = (void *)self->buf1;
+    } else {
+        if (self->buf2 == NULL) {
+            return mp_const_none;
+        }
+        ar.items = (void *)self->buf2;
+
     }
 
-    if (self->buf2 == NULL) {
-        return mp_const_none;
-    }
-    return mp_obj_new_memoryview('B', self->buffer_size, self->buf2);
-
+    return MP_OBJ_FROM_PTR(&ar);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_bus_get_frame_buffer_obj, 2, mp_lcd_bus_get_frame_buffer);

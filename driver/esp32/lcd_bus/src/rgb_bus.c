@@ -401,18 +401,25 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         } else {
             esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 1, &buf1);
         }
-    
-        if (buf_num == 2) {
-            return mp_obj_new_memoryview('B', self->buffer_size, buf2);
+
+        mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL}
+
+        if (buf_num == 1) {
+            if (self->buf1 == NULL) {
+                return mp_const_none;
+            }
+            ar.items = buf1;
+        } else {
+            if (self->buf2 == NULL) {
+                return mp_const_none;
+            }
+            ar.items = buf2;
+
         }
 
-        if (buf1 == NULL) {
-            return mp_const_none;
-        }
-
-        return mp_obj_new_memoryview('B', self->buffer_size, buf1);
+        return MP_OBJ_FROM_PTR(&ar);
     }
-    
+
     STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_rgb_bus_get_frame_buffer_obj, 2, mp_lcd_rgb_bus_get_frame_buffer);
     
     
