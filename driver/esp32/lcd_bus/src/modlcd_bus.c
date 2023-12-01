@@ -20,7 +20,7 @@ bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_even
     if (bus_obj->callback != mp_const_none) {
         mp_sched_schedule(bus_obj->callback, bus_obj->user_ctx);
     } else {
-        bus_obj.trans_done = true;
+        bus_obj->trans_done = true;
     }
     mp_hal_wake_main_task_from_isr();
 

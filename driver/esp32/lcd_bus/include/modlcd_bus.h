@@ -93,9 +93,9 @@ STATIC mp_obj_t mp_lcd_bus_tx_color(size_t n_args, const mp_obj_t *pos_args, mp_
         mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_tx_color)", ret);
     }
 
-    if ((self.use_dma == false) && (self->callback != mp_const_none)) {
+    if ((self->use_dma == false) && (self->callback != mp_const_none)) {
         mp_sched_schedule(self->callback, self->user_ctx);
-    } else if ((self.use_dma == true) && (self->callback == mp_const_none)) {
+    } else if ((self->use_dma == true) && (self->callback == mp_const_none)) {
         while (self->trans_done == false) {}
         self->trans_done = false;
     }
