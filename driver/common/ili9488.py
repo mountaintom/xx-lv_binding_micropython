@@ -144,3 +144,7 @@ class ILI9488(display_driver_framework.DisplayDriver):
         self._data_bus.tx_param(_ADJUST_CTL_THREE, param_mv[:4])
 
         self.set_params(_NOP)
+
+        display_driver_framework.DisplayDriver.init(self)
+
+

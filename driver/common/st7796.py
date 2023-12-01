@@ -179,3 +179,5 @@ class ST7796(display_driver_framework.DisplayDriver):
         self.set_params(_DISPON)
 
         time.sleep_ms(120)
+
+        display_driver_framework.DisplayDriver.init(self)
