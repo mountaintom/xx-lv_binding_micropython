@@ -345,7 +345,7 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
 
         if (self->callback == mp_const_none) {
             while (self->trans_done == false) {}
-            self->trans_done = true;
+            self->trans_done = false;
         }
 
         return mp_const_none;
