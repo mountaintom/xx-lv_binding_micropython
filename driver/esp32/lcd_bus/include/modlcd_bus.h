@@ -18,6 +18,7 @@ typedef struct _mp_lcd_bus_obj_t {
     int buffer_size;
     bool fb_in_psram;
     bool use_dma;
+    bool trans_done;
 
     uint8_t *buf1;
     uint8_t *buf2;
@@ -90,6 +91,13 @@ STATIC mp_obj_t mp_lcd_bus_tx_color(size_t n_args, const mp_obj_t *pos_args, mp_
 
     if (ret != 0) {
         mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_tx_color)", ret);
+    }
+
+    if ((self.use_dma == false) && (self->callback != mp_const_none)) {
+        mp_sched_schedule(self->callback, self->user_ctx);
+    } else if ((self.use_dma == true) && (self->callback == mp_const_none)) {
+        while (self->trans_done == false) {}
+        self->trans_done = false;
     }
 
     return mp_const_none;

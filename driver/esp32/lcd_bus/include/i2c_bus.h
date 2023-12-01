@@ -14,6 +14,7 @@ typedef struct _mp_lcd_i2c_bus_obj_t {
     int buffer_size;
     bool fb_in_psram;
     bool use_dma;
+    bool trans_done;
 
     uint8_t *buf1;
     uint8_t *buf2;
