@@ -176,4 +176,19 @@ STATIC mp_obj_t mp_lcd_bus_get_frame_buffer(size_t n_args, const mp_obj_t *pos_a
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_bus_get_frame_buffer_obj, 2, mp_lcd_bus_get_frame_buffer);
 
 
+STATIC mp_obj_t mp_lcd_bus_get_frame_buffer_size(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_self,         MP_ARG_OBJ | MP_ARG_REQUIRED  }
+    };
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    mp_lcd_bus_obj_t *self = (mp_lcd_bus_obj_t *)args[ARG_self].u_obj;
+
+    return mp_obj_new_int(self->buffer_size);
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_bus_get_frame_buffer_size_obj, 1, mp_lcd_bus_get_frame_buffer_size);
+
 #endif /*MODLCD_BUS_H*/

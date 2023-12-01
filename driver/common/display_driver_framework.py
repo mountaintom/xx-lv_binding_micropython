@@ -18,6 +18,7 @@ COLOR_MODE_BGR = const(0x08)
 _RASET = const(0x2B)
 _CASET = const(0x2A)
 _RAMWR = const(0x2C)
+_MADCTL = const(0x36)
 
 _MADCTL_MH = const(0x04)  # Refresh 0=Left to Right, 1=Right to Left
 _MADCTL_ML = const(0x10)  # Refresh 0=Top to Bottom, 1=Bottom to Top
@@ -127,6 +128,7 @@ class DisplayDriver:
 
         self._frame_buffer_1 = data_bus.get_frame_buffer(1)
         self._frame_buffer_2 = data_bus.get_frame_buffer(2)
+        frame_buffer_size = data_bus.get_frame_buffer_size()
 
         self._disp_drv = lv.disp_create(self.display_width, self.display_height)
         self._disp_drv.set_flush_cb(self._flush_cb)
@@ -135,14 +137,14 @@ class DisplayDriver:
             self._disp_drv.set_draw_buffers(
                 self._frame_buffer_1,
                 self._frame_buffer_2,
-                self.display_width * self.display_height,
+                int(frame_buffer_size // lv.color_t.__SIZE__),
                 lv.DISP_RENDER_MODE.FULL
             )
         else:
             self._disp_drv.set_draw_buffers(
                 self._frame_buffer_1,
                 self._frame_buffer_2,
-                data_bus.frame_buffer_size() // lv.color_t.__SIZE__,
+                int(frame_buffer_size // lv.color_t.__SIZE__),
                 lv.DISP_RENDER_MODE.PARTIAL
             )
 

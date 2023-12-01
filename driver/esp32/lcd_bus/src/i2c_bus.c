@@ -166,6 +166,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(mp_lcd_i2c_bus_deinit_obj, mp_lcd_i2c_bus_deini
 
 
 STATIC const mp_rom_map_elem_t mp_lcd_i2c_bus_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_get_frame_buffer_size),  MP_ROM_PTR(&mp_lcd_bus_get_frame_buffer_size_obj)  },
     { MP_ROM_QSTR(MP_QSTR_get_frame_buffer),  MP_ROM_PTR(&mp_lcd_bus_get_frame_buffer_obj)  },
     { MP_ROM_QSTR(MP_QSTR_register_callback), MP_ROM_PTR(&mp_lcd_bus_register_callback_obj) },
     { MP_ROM_QSTR(MP_QSTR_tx_param),          MP_ROM_PTR(&mp_lcd_bus_tx_param_obj)          },

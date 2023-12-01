@@ -202,10 +202,15 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
     
         mp_lcd_rgb_bus_obj_t *self = (mp_lcd_rgb_bus_obj_t *)args[ARG_self].u_obj;
-    
-        self->panel_io_config.timings.h_res = (uint32_t)args[ARG_width].u_int;
-        self->panel_io_config.timings.v_res = (uint32_t)args[ARG_height].u_int;
-        self->panel_io_config.bits_per_pixel = (size_t)args[ARG_bpp].u_int;
+
+        int width = (int)args[ARG_width].u_int;
+        int height = (int)args[ARG_height].u_int;
+        int bpp = (int)args[ARG_bpp].u_int;
+
+        self->buffer_size = width * height * (bpp / 8);
+        self->panel_io_config.timings.h_res = (uint32_t)width;
+        self->panel_io_config.timings.v_res = (uint32_t)height;
+        self->panel_io_config.bits_per_pixel = (size_t)bpp;
     
         esp_err_t ret = esp_lcd_new_rgb_panel(&self->panel_io_config, &self->panel_io_handle);
         if (ret != 0) {
@@ -337,6 +342,10 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         if (ret != 0) {
             mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_draw_bitmap)", ret);
         }
+
+        if (self->callback != mp_const_none) {
+            mp_sched_schedule(self->callback, self->user_ctx);
+        }
     
         return mp_const_none;
     }
@@ -408,6 +417,7 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     
     
     STATIC const mp_rom_map_elem_t mp_lcd_rgb_bus_locals_dict_table[] = {
+        { MP_ROM_QSTR(MP_QSTR_get_frame_buffer_size),  MP_ROM_PTR(&mp_lcd_bus_get_frame_buffer_size_obj)  },
         { MP_ROM_QSTR(MP_QSTR_get_frame_buffer),  MP_ROM_PTR(&mp_lcd_rgb_bus_get_frame_buffer_obj)  },
         { MP_ROM_QSTR(MP_QSTR_tx_param),          MP_ROM_PTR(&mp_lcd_rgb_bus_tx_param_obj)          },
         { MP_ROM_QSTR(MP_QSTR_tx_color),          MP_ROM_PTR(&mp_lcd_rgb_bus_tx_color_obj)          },
