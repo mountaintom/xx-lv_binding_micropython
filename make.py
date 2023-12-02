@@ -32,6 +32,13 @@ argParser.add_argument(
     action='store_true'
 )
 
+argParser.add_argument(
+    '-skip-partition-resize',
+    dest='skip_partition_resize',
+    help='clean the build',
+    action='store_true'
+)
+
 args, extra_args = argParser.parse_known_args(args)
 
 os.chdir(MPY_DIR)
@@ -58,14 +65,26 @@ def get_partition_file_name(otp):
             return line.split('=', 1)[-1].replace('"', '')
 
 
+PARTITION_HEADER = '''\
+# Notes: the offset of the partition table itself is set in
+# $IDF_PATH/components/partition_table/Kconfig.projbuild.
+# Name,   Type, SubType, Offset,  Size, Flags
+'''
+
+
 class Partition:
 
     def __init__(self, file_path):
         self.file_path = file_path
+        self._saved_data = None
         self.csv_data = self.read_csv()
         last_partition = self.csv_data[-1]
 
         self.total_space = last_partition[-2] + last_partition[-3]
+
+    def revert_to_original(self):
+        with open(self.file_path, 'w') as f:
+            f.write(self._saved_data)
 
     def set_app_size(self, size):
         next_offset = 0
@@ -105,12 +124,14 @@ class Partition:
             otp.append(','.join(convert_to_hex(item) for item in line))
 
         with open(self.file_path, 'w') as f:
+            f.write(PARTITION_HEADER)
             f.write('\n'.join(otp))
-            f.write('\n')
 
     def read_csv(self):
         with open(self.file_path, 'r') as f:
             csv_data = f.read()
+
+        self._saved_data = csv_data
 
         csv_data = [
             line.strip()
@@ -123,9 +144,9 @@ class Partition:
                 elem = int(elem, 16)
             return elem
 
-        for i, line in enumerate(csv_data):
+        for j, line in enumerate(csv_data):
             line = [convert_to_int(item.strip()) for item in line.split(',')]
-            csv_data[i] = line
+            csv_data[j] = line
 
         return csv_data
 
@@ -246,14 +267,14 @@ elif target.lower() == 'windows':
             'clean',
             '-C',
             f'ports/{target}'
-            'USER_C_MODULES=../../../micropython.cmake'
+            f'USER_C_MODULES=={SCRIPT_DIR}/make_build'
         ] + extra_args
 
         compile_cmd = [
             'make',
             '-C',
             f'ports/{target}',
-            'USER_C_MODULES=../../../micropython.cmake'
+            f'USER_C_MODULES=={SCRIPT_DIR}/make_build'
         ] + extra_args
 
         submodules_cmd = []
@@ -324,6 +345,30 @@ def run_additional_commands():
 
 
 def run_esp32():
+
+    with open('ports/esp32/mpconfigport.h', 'r') as f:
+        conf_data = f.read()
+
+    conf_data = conf_data.replace(
+        '#define MICROPY_PY_MACHINE_I2S              (1)',
+        '#define MICROPY_PY_MACHINE_I2S              (0)'
+    )
+
+    with open('ports/esp32/mpconfigport.h', 'w') as f:
+        f.write(conf_data)
+
+    if 'deploy' in compile_cmd:
+        clean_cmd.remove('deploy')
+        submodules_cmd.remove('deploy')
+
+        if not args.skip_partition_resize:
+            compile_cmd.remove('deploy')
+            deploy = True
+        else:
+            deploy = False
+    else:
+        deploy = False
+
     new_data = [
         '',
         f"freeze('{SCRIPT_DIR}/driver/common', 'display_driver_framework.py')",
@@ -381,8 +426,14 @@ def run_esp32():
 
     ret_code, output = spawn(compile_cmd)
     if ret_code != 0:
-        if 'partition is too small ' not in output:
+        if (
+            'partition is too small ' not in output or
+            args.skip_partition_resize
+        ):
             sys.exit(ret_code)
+
+        sys.stdout.write('\n\033[31;1m***** Resizing Partition *****\033[0m\n')
+        sys.stdout.flush()
 
         end = output.split('(overflow ', 1)[-1]
         overflow_amount = int(end.split(')', 1)[0], 16)
@@ -398,11 +449,53 @@ def run_esp32():
         partition.set_app_size(overflow_amount)
         partition.save()
 
-        spawn(clean_cmd)
+        sys.stdout.write('\n\033[31;1m***** Running build again *****\033[0m\n\n')
+        sys.stdout.flush()
+
+        if deploy:
+            compile_cmd.append('deploy')
+
         ret_code, output = spawn(compile_cmd)
+
+        # partition.revert_to_original()
 
         if ret_code != 0:
             sys.exit(ret_code)
+
+    elif not args.skip_partition_resize:
+        if 'Project build complete.' in output:
+
+            sys.stdout.write('\n\033[31;1m***** Resizing Partition *****\033[0m\n')
+            sys.stdout.flush()
+
+            size_diff = output.rsplit('application')[1]
+            size_diff = int(size_diff.split('(', 1)[-1].split('remaining')[0].strip())
+
+            partition_file_name = get_partition_file_name(output)
+
+            if partition_file_name not in partition_file_names:
+                sys.stdout.write(
+                    f'\n\033[31;1mUnable to adjust partition size ({partition_file_name})\033[0m\n\n'
+                )
+                sys.stdout.flush()
+                sys.exit(0)
+
+            partition = Partition(partition_file_names[partition_file_name])
+            partition.set_app_size(-size_diff)
+            partition.save()
+
+            sys.stdout.write('\n\033[31;1m***** Running build again *****\033[0m\n\n')
+            sys.stdout.flush()
+
+            if deploy:
+                compile_cmd.append('deploy')
+
+            ret_code, output = spawn(compile_cmd)
+
+            # partition.revert_to_original()
+
+            if ret_code != 0:
+                sys.exit(ret_code)
 
     if 'Running cmake in directory ' in output:
         build_path = output.split('Running cmake in directory ', 1)[-1]

@@ -67,12 +67,19 @@
     #define LV_SPRINTF_USE_FLOAT 0
 #endif  /*LV_USE_BUILTIN_SNPRINTF*/
 
-#define LV_STDLIB_INCLUDE "include/lv_mp_mem_custom_include.h"
+#define LV_STDLIB_INCLUDE "lv_mp_mem_custom_include.h"
 #define LV_STDIO_INCLUDE  <stdint.h>
 #define LV_STRING_INCLUDE <stdint.h>
 #define LV_MALLOC       m_malloc
+
+#ifdef MICROPY_SDL
+#define LV_REALLOC(x, y)     m_realloc(x, sizeof(x), y)
+#define LV_FREE(x)      m_free(x, sizeof(x))
+#else
 #define LV_REALLOC      m_realloc
 #define LV_FREE         m_free
+#endif
+
 #define LV_MEMSET       lv_memset_builtin
 #define LV_MEMCPY       lv_memcpy_builtin
 #define LV_SNPRINTF     lv_snprintf_builtin
@@ -389,7 +396,7 @@
 #define LV_FONT_MONTSERRAT_10 0
 #define LV_FONT_MONTSERRAT_12 0
 #define LV_FONT_MONTSERRAT_14 1
-#define LV_FONT_MONTSERRAT_16 1
+#define LV_FONT_MONTSERRAT_16 0
 #define LV_FONT_MONTSERRAT_18 0
 #define LV_FONT_MONTSERRAT_20 0
 #define LV_FONT_MONTSERRAT_22 0
