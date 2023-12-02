@@ -280,6 +280,533 @@ elif target.lower() == 'windows':
         submodules_cmd = []
 
 elif target.lower() == 'esp32':
+    esp_argParser = ArgumentParser()
+
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_I2S',
+        dest='MICROPY_PY_MACHINE_I2S',
+        action='store',
+        default=0,
+        type=int,
+        choices=[0, 1]
+    )
+
+    esp_argParser.add_argument(
+        '-DMICROPY_ESPNOW',
+        dest='MICROPY_ESPNOW',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_BLUETOOTH',
+        dest='MICROPY_PY_BLUETOOTH',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS',
+        dest='MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS_WITH_INTERLOCK',
+        dest='MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS_WITH_INTERLOCK',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE',
+        dest='MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_BLUETOOTH_ENABLE_PAIRING_BONDING',
+        dest='MICROPY_PY_BLUETOOTH_ENABLE_PAIRING_BONDING',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_BLUETOOTH_NIMBLE',
+        dest='MICROPY_BLUETOOTH_NIMBLE',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_BLUETOOTH_NIMBLE_BINDINGS_ONLY',
+        dest='MICROPY_BLUETOOTH_NIMBLE_BINDINGS_ONLY',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_HASHLIB_SHA1',
+        dest='MICROPY_PY_HASHLIB_SHA1',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_HASHLIB_SHA256',
+        dest='MICROPY_PY_HASHLIB_SHA256',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_CRYPTOLIB',
+        dest='MICROPY_PY_CRYPTOLIB',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_OS_DUPTERM',
+        dest='MICROPY_PY_OS_DUPTERM',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_OS_DUPTERM_NOTIFY',
+        dest='MICROPY_PY_OS_DUPTERM_NOTIFY',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_OS_SYNC',
+        dest='MICROPY_PY_OS_SYNC',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_OS_UNAME',
+        dest='MICROPY_PY_OS_UNAME',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_OS_URANDOM',
+        dest='MICROPY_PY_OS_URANDOM',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE',
+        dest='MICROPY_PY_MACHINE',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_BITSTREAM',
+        dest='MICROPY_PY_MACHINE_BITSTREAM',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_PULSE',
+        dest='MICROPY_PY_MACHINE_PULSE',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_PWM',
+        dest='MICROPY_PY_MACHINE_PWM',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_PWM_DUTY',
+        dest='MICROPY_PY_MACHINE_PWM_DUTY',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_I2C',
+        dest='MICROPY_PY_MACHINE_I2C',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1',
+        dest='MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_SOFTI2C',
+        dest='MICROPY_PY_MACHINE_SOFTI2C',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_SPI',
+        dest='MICROPY_PY_MACHINE_SPI',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_SPI_MSB',
+        dest='MICROPY_PY_MACHINE_SPI_MSB',
+        action='store',
+        default=0,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_SPI_LSB',
+        dest='MICROPY_PY_MACHINE_SPI_LSB',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_SOFTSPI',
+        dest='MICROPY_PY_MACHINE_SOFTSPI',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_MACHINE_DAC',
+        dest='MICROPY_PY_MACHINE_DAC',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_NETWORK',
+        dest='MICROPY_PY_NETWORK',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_NETWORK_WLAN',
+        dest='MICROPY_PY_NETWORK_WLAN',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_HW_ENABLE_SDCARD',
+        dest='MICROPY_HW_ENABLE_SDCARD',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_SSL',
+        dest='MICROPY_PY_SSL',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_SSL_MBEDTLS',
+        dest='MICROPY_SSL_MBEDTLS',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_WEBSOCKET',
+        dest='MICROPY_PY_WEBSOCKET',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_WEBREPL',
+        dest='MICROPY_PY_WEBREPL',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_ONEWIRE',
+        dest='MICROPY_PY_ONEWIRE',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_HW_ESP32S3_EXTENDED_IO',
+        dest='MICROPY_HW_ESP32S3_EXTENDED_IO',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_HW_ENABLE_MDNS_QUERIES',
+        dest='MICROPY_HW_ENABLE_MDNS_QUERIES',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_HW_ENABLE_MDNS_RESPONDER',
+        dest='MICROPY_HW_ENABLE_MDNS_RESPONDER',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+    esp_argParser.add_argument(
+        '-DMICROPY_PY_NETWORK_LAN',
+        dest='MICROPY_PY_NETWORK_LAN',
+        action='store',
+        default=1,
+        type=int,
+        choices=[0, 1]
+    )
+
+    esp_args, extra_args = esp_argParser.parse_known_args(extra_args)
+
+    if esp_args.MICROPY_PY_MACHINE_SPI_MSB:
+        esp_args.MICROPY_PY_MACHINE_SPI_LSB = 0
+    if not esp_args.MICROPY_PY_MACHINE_SPI_LSB:
+        esp_args.MICROPY_PY_MACHINE_SPI_MSB = 1
+
+    replacements = (
+        (
+            f'#define MICROPY_PY_MACHINE_I2S              ({int(not esp_args.MICROPY_PY_MACHINE_I2S)})',
+            f'#define MICROPY_PY_MACHINE_I2S              ({esp_args.MICROPY_PY_MACHINE_I2S})'
+        ),
+        (
+            f'#define MICROPY_ESPNOW                      ({int(not esp_args.MICROPY_ESPNOW)})',
+            f'#define MICROPY_ESPNOW                      ({esp_args.MICROPY_ESPNOW})'
+        ),
+        (
+            f'#define MICROPY_PY_BLUETOOTH                ({int(not esp_args.MICROPY_PY_BLUETOOTH)})',
+            f'#define MICROPY_PY_BLUETOOTH                ({esp_args.MICROPY_PY_BLUETOOTH})'
+        ),
+        (
+            f'#define MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS ({int(not esp_args.MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS)})',
+            f'#define MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS ({esp_args.MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS})'
+        ),
+        (
+            f'#define MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS_WITH_INTERLOCK ({int(not esp_args.MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS_WITH_INTERLOCK)})',
+            f'#define MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS_WITH_INTERLOCK ({esp_args.MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS_WITH_INTERLOCK})'
+        ),
+        (
+            f'#define MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE ({int(not esp_args.MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE)})',
+            f'#define MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE ({esp_args.MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE})'
+        ),
+        (
+            f'#define MICROPY_PY_BLUETOOTH_ENABLE_PAIRING_BONDING ({int(not esp_args.MICROPY_PY_BLUETOOTH_ENABLE_PAIRING_BONDING)})',
+            f'#define MICROPY_PY_BLUETOOTH_ENABLE_PAIRING_BONDING ({esp_args.MICROPY_PY_BLUETOOTH_ENABLE_PAIRING_BONDING})'
+        ),
+        (
+            f'#define MICROPY_BLUETOOTH_NIMBLE            ({int(not esp_args.MICROPY_BLUETOOTH_NIMBLE)})',
+            f'#define MICROPY_BLUETOOTH_NIMBLE            ({esp_args.MICROPY_BLUETOOTH_NIMBLE})'
+        ),
+        (
+            f'#define MICROPY_BLUETOOTH_NIMBLE_BINDINGS_ONLY ({int(not esp_args.MICROPY_BLUETOOTH_NIMBLE_BINDINGS_ONLY)})',
+            f'#define MICROPY_BLUETOOTH_NIMBLE_BINDINGS_ONLY ({esp_args.MICROPY_BLUETOOTH_NIMBLE_BINDINGS_ONLY})'
+        ),
+        (
+            f'#define MICROPY_PY_HASHLIB_SHA{int(not esp_args.MICROPY_PY_HASHLIB_SHA1)}             ({int(not esp_args.MICROPY_PY_HASHLIB_SHA1)})',
+            f'#define MICROPY_PY_HASHLIB_SHA{esp_args.MICROPY_PY_HASHLIB_SHA1}             ({esp_args.MICROPY_PY_HASHLIB_SHA1})'
+        ),
+        (
+            f'#define MICROPY_PY_HASHLIB_SHA256           ({int(not esp_args.MICROPY_PY_HASHLIB_SHA256)})',
+            f'#define MICROPY_PY_HASHLIB_SHA256           ({esp_args.MICROPY_PY_HASHLIB_SHA256})'
+        ),
+        (
+            f'#define MICROPY_PY_CRYPTOLIB                ({int(not esp_args.MICROPY_PY_CRYPTOLIB)})',
+            f'#define MICROPY_PY_CRYPTOLIB                ({esp_args.MICROPY_PY_CRYPTOLIB})'
+        ),
+        (
+            f'#define MICROPY_PY_OS_DUPTERM               ({int(not esp_args.MICROPY_PY_OS_DUPTERM)})',
+            f'#define MICROPY_PY_OS_DUPTERM               ({esp_args.MICROPY_PY_OS_DUPTERM})'
+        ),
+        (
+            f'#define MICROPY_PY_OS_DUPTERM_NOTIFY        ({int(not esp_args.MICROPY_PY_OS_DUPTERM_NOTIFY)})',
+            f'#define MICROPY_PY_OS_DUPTERM_NOTIFY        ({esp_args.MICROPY_PY_OS_DUPTERM_NOTIFY})'
+        ),
+        (
+            f'#define MICROPY_PY_OS_SYNC                  ({int(not esp_args.MICROPY_PY_OS_SYNC)})',
+            f'#define MICROPY_PY_OS_SYNC                  ({esp_args.MICROPY_PY_OS_SYNC})'
+        ),
+        (
+            f'#define MICROPY_PY_OS_UNAME                 ({int(not esp_args.MICROPY_PY_OS_UNAME)})',
+            f'#define MICROPY_PY_OS_UNAME                 ({esp_args.MICROPY_PY_OS_UNAME})'
+        ),
+        (
+            f'#define MICROPY_PY_OS_URANDOM               ({int(not esp_args.MICROPY_PY_OS_URANDOM)})',
+            f'#define MICROPY_PY_OS_URANDOM               ({esp_args.MICROPY_PY_OS_URANDOM})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE                  ({int(not esp_args.MICROPY_PY_MACHINE)})',
+            f'#define MICROPY_PY_MACHINE                  ({esp_args.MICROPY_PY_MACHINE})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_BITSTREAM        ({int(not esp_args.MICROPY_PY_MACHINE_BITSTREAM)})',
+            f'#define MICROPY_PY_MACHINE_BITSTREAM        ({esp_args.MICROPY_PY_MACHINE_BITSTREAM})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_PULSE            ({int(not esp_args.MICROPY_PY_MACHINE_PULSE)})',
+            f'#define MICROPY_PY_MACHINE_PULSE            ({esp_args.MICROPY_PY_MACHINE_PULSE})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_PWM              ({int(not esp_args.MICROPY_PY_MACHINE_PWM)})',
+            f'#define MICROPY_PY_MACHINE_PWM              ({esp_args.MICROPY_PY_MACHINE_PWM})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_PWM_DUTY         ({int(not esp_args.MICROPY_PY_MACHINE_PWM_DUTY)})',
+            f'#define MICROPY_PY_MACHINE_PWM_DUTY         ({esp_args.MICROPY_PY_MACHINE_PWM_DUTY})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_I2C              ({int(not esp_args.MICROPY_PY_MACHINE_I2C)})',
+            f'#define MICROPY_PY_MACHINE_I2C              ({esp_args.MICROPY_PY_MACHINE_I2C})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1 ({int(not esp_args.MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1)})',
+            f'#define MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1 ({esp_args.MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_SOFTI2C          ({int(not esp_args.MICROPY_PY_MACHINE_SOFTI2C)})',
+            f'#define MICROPY_PY_MACHINE_SOFTI2C          ({esp_args.MICROPY_PY_MACHINE_SOFTI2C})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_SPI              ({int(not esp_args.MICROPY_PY_MACHINE_SPI)})',
+            f'#define MICROPY_PY_MACHINE_SPI              ({esp_args.MICROPY_PY_MACHINE_SPI})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_SPI_MSB          ({int(not esp_args.MICROPY_PY_MACHINE_SPI_MSB)})',
+            f'#define MICROPY_PY_MACHINE_SPI_MSB          ({esp_args.MICROPY_PY_MACHINE_SPI_MSB})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_SPI_LSB          ({int(not esp_args.MICROPY_PY_MACHINE_SPI_LSB)})',
+            f'#define MICROPY_PY_MACHINE_SPI_LSB          ({esp_args.MICROPY_PY_MACHINE_SPI_LSB})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_SOFTSPI          ({int(not esp_args.MICROPY_PY_MACHINE_SOFTSPI)})',
+            f'#define MICROPY_PY_MACHINE_SOFTSPI          ({esp_args.MICROPY_PY_MACHINE_SOFTSPI})'
+        ),
+        (
+            f'#define MICROPY_PY_MACHINE_DAC              ({int(not esp_args.MICROPY_PY_MACHINE_DAC)})',
+            f'#define MICROPY_PY_MACHINE_DAC              ({esp_args.MICROPY_PY_MACHINE_DAC})'
+        ),
+        (
+            f'#define MICROPY_PY_NETWORK ({int(not esp_args.MICROPY_PY_NETWORK)})',
+            f'#define MICROPY_PY_NETWORK ({esp_args.MICROPY_PY_NETWORK})'
+        ),
+        (
+            f'#define MICROPY_PY_NETWORK_WLAN             ({int(not esp_args.MICROPY_PY_NETWORK_WLAN)})',
+            f'#define MICROPY_PY_NETWORK_WLAN             ({esp_args.MICROPY_PY_NETWORK_WLAN})'
+        ),
+        (
+            f'#define MICROPY_HW_ENABLE_SDCARD            ({int(not esp_args.MICROPY_HW_ENABLE_SDCARD)})',
+            f'#define MICROPY_HW_ENABLE_SDCARD            ({esp_args.MICROPY_HW_ENABLE_SDCARD})'
+        ),
+        (
+            f'#define MICROPY_PY_SSL                      ({int(not esp_args.MICROPY_PY_SSL)})',
+            f'#define MICROPY_PY_SSL                      ({esp_args.MICROPY_PY_SSL})'
+        ),
+        (
+            f'#define MICROPY_SSL_MBEDTLS                 ({int(not esp_args.MICROPY_SSL_MBEDTLS)})',
+            f'#define MICROPY_SSL_MBEDTLS                 ({esp_args.MICROPY_SSL_MBEDTLS})'
+        ),
+        (
+            f'#define MICROPY_PY_WEBSOCKET                ({int(not esp_args.MICROPY_PY_WEBSOCKET)})',
+            f'#define MICROPY_PY_WEBSOCKET                ({esp_args.MICROPY_PY_WEBSOCKET})'
+        ),
+        (
+            f'#define MICROPY_PY_WEBREPL                  ({int(not esp_args.MICROPY_PY_WEBREPL)})',
+            f'#define MICROPY_PY_WEBREPL                  ({esp_args.MICROPY_PY_WEBREPL})'
+        ),
+        (
+            f'#define MICROPY_PY_ONEWIRE                  ({int(not esp_args.MICROPY_PY_ONEWIRE)})',
+            f'#define MICROPY_PY_ONEWIRE                  ({esp_args.MICROPY_PY_ONEWIRE})'
+        ),
+        (
+            f'#define MICROPY_HW_ESP32S3_EXTENDED_IO      ({int(not esp_args.MICROPY_HW_ESP32S3_EXTENDED_IO)})',
+            f'#define MICROPY_HW_ESP32S3_EXTENDED_IO      ({esp_args.MICROPY_HW_ESP32S3_EXTENDED_IO})'
+        ),
+        (
+            f'#define MICROPY_HW_ENABLE_MDNS_QUERIES      ({int(not esp_args.MICROPY_HW_ENABLE_MDNS_QUERIES)})',
+            f'#define MICROPY_HW_ENABLE_MDNS_QUERIES      ({esp_args.MICROPY_HW_ENABLE_MDNS_QUERIES})'
+        ),
+        (
+            f'#define MICROPY_HW_ENABLE_MDNS_RESPONDER    ({int(not esp_args.MICROPY_HW_ENABLE_MDNS_RESPONDER)})',
+            f'#define MICROPY_HW_ENABLE_MDNS_RESPONDER    ({esp_args.MICROPY_HW_ENABLE_MDNS_RESPONDER})'
+        ),
+        (
+            f'#define MICROPY_PY_NETWORK_LAN              ({int(not esp_args.MICROPY_PY_NETWORK_LAN)})',
+            f'#define MICROPY_PY_NETWORK_LAN              ({esp_args.MICROPY_PY_NETWORK_LAN})'
+        ),
+    )
+
+    with open('ports/esp32/mpconfigport.h', 'r') as f:
+        conf_data = f.read()
+
+    for pattern, text in replacements:
+        conf_data.replace(pattern, text)
+
+    with open('ports/esp32/mpconfigport.h', 'w') as f:
+        f.write(conf_data)
+
     mpy_cross_cmd = ['make', '-C', 'mpy-cross']
     clean_cmd = [
         'make',
@@ -345,17 +872,6 @@ def run_additional_commands():
 
 
 def run_esp32():
-
-    with open('ports/esp32/mpconfigport.h', 'r') as f:
-        conf_data = f.read()
-
-    conf_data = conf_data.replace(
-        '#define MICROPY_PY_MACHINE_I2S              (1)',
-        '#define MICROPY_PY_MACHINE_I2S              (0)'
-    )
-
-    with open('ports/esp32/mpconfigport.h', 'w') as f:
-        f.write(conf_data)
 
     if 'deploy' in compile_cmd:
         clean_cmd.remove('deploy')

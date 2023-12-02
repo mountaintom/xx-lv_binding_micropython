@@ -46,6 +46,63 @@ compilation will fail the first time and then it will make the needed modificati
 then perform a clean and restart compiling. If you continue to flash the same board
 without changing anything then this is only going to take place the first time.
 
+
+
+I have also added in the ability to turn individual micropython features off.
+These are the features you can disable.
+
+This only works for the ESP32. I will add it to other ports later on.
+
+* MICROPY_ESPNOW
+* MICROPY_PY_BLUETOOTH
+* MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS
+* MICROPY_PY_BLUETOOTH_USE_SYNC_EVENTS_WITH_INTERLOCK
+* MICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE
+* MICROPY_PY_BLUETOOTH_ENABLE_PAIRING_BONDING
+* MICROPY_BLUETOOTH_NIMBLE
+* MICROPY_BLUETOOTH_NIMBLE_BINDINGS_ONLY
+* MICROPY_PY_HASHLIB_SHA1
+* MICROPY_PY_HASHLIB_SHA256
+* MICROPY_PY_CRYPTOLIB
+* MICROPY_PY_OS_DUPTERM
+* MICROPY_PY_OS_DUPTERM_NOTIFY
+* MICROPY_PY_OS_SYNC
+* MICROPY_PY_OS_UNAME
+* MICROPY_PY_OS_URANDOM
+* MICROPY_PY_MACHINE
+* MICROPY_PY_MACHINE_BITSTREAM
+* MICROPY_PY_MACHINE_PULSE
+* MICROPY_PY_MACHINE_PWM
+* MICROPY_PY_MACHINE_PWM_DUTY
+* MICROPY_PY_MACHINE_I2C
+* MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1
+* MICROPY_PY_MACHINE_SOFTI2C
+* MICROPY_PY_MACHINE_SPI
+* MICROPY_PY_MACHINE_SPI_MSB
+* MICROPY_PY_MACHINE_SPI_LSB
+* MICROPY_PY_MACHINE_SOFTSPI
+* MICROPY_PY_MACHINE_DAC
+* MICROPY_PY_NETWORK
+* MICROPY_PY_NETWORK_WLAN
+* MICROPY_HW_ENABLE_SDCARD
+* MICROPY_PY_SSL
+* MICROPY_SSL_MBEDTLS
+* MICROPY_PY_WEBSOCKET
+* MICROPY_PY_WEBREPL
+* MICROPY_PY_ONEWIRE
+* MICROPY_HW_ESP32S3_EXTENDED_IO
+* MICROPY_HW_ENABLE_MDNS_QUERIES
+* MICROPY_HW_ENABLE_MDNS_RESPONDER
+* MICROPY_PY_NETWORK_LAN
+
+
+How you use this feature is to prepend a name above with `-D` and append it with `=0`
+You end up with this
+
+`-DMICROPY_PY_NETWORK_LAN=0`
+
+I2S has been disabled by default due to an upstream problem in micropython.
+
 ---
 
 See also [Micropython + LittlevGL](https://blog.lvgl.io/2019-02-20/micropython-bindings) blog post. (LittlevGL is the previous name of LVGL.)
