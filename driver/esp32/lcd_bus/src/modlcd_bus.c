@@ -12,7 +12,8 @@
 #include "mphalport.h"
 #include "py/obj.h"
 #include "py/runtime.h"
-\
+#include "py/objarray.h"
+
 
 bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
 {
