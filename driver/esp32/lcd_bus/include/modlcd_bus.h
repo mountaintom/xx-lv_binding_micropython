@@ -181,6 +181,7 @@ STATIC mp_obj_t mp_lcd_bus_get_frame_buffer(size_t n_args, const mp_obj_t *pos_a
         }
         return MP_OBJ_FROM_PTR(&self->buf2);
     }
+    //return mp_obj_new_memoryview(BYTEARRAY_TYPECODE | MP_OBJ_ARRAY_TYPECODE_FLAG_RW, size, buffer);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_bus_get_frame_buffer_obj, 2, mp_lcd_bus_get_frame_buffer);

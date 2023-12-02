@@ -31,8 +31,8 @@ bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_even
 
 
 void initilize_buffers(mp_lcd_bus_obj_t *self) {
-    mp_obj_array_t buf1 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, (size_t)self->buffer_size, 0, NULL};
-    mp_obj_array_t buf2 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, (size_t)self->buffer_size, 0, NULL};
+    mp_obj_array_t buf1 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE | MP_OBJ_ARRAY_TYPECODE_FLAG_RW, (size_t)self->buffer_size, 0, NULL};
+    mp_obj_array_t buf2 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE | MP_OBJ_ARRAY_TYPECODE_FLAG_RW, (size_t)self->buffer_size, 0, NULL};
 
     self->buf1 = buf1;
     self->buf2 = buf2;
