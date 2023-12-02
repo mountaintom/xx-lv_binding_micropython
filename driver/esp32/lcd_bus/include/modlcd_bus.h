@@ -3,7 +3,6 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/objarray.h"
-#include "py/binary.h"
 
 #include "esp_lcd_panel_io.h"
 
@@ -21,8 +20,8 @@ typedef struct _mp_lcd_bus_obj_t {
     bool use_dma;
     bool trans_done;
 
-    uint8_t *buf1;
-    uint8_t *buf2;
+    mp_obj_array_t buf1;
+    mp_obj_array_t buf2;
 
     esp_lcd_panel_io_handle_t panel_io_handle;
 
@@ -30,7 +29,7 @@ typedef struct _mp_lcd_bus_obj_t {
 
 
 bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
-
+void initilize_buffers(mp_lcd_bus_obj_t *self);
 void allocate_buffers(mp_lcd_bus_obj_t *self);
 
 
@@ -171,22 +170,17 @@ STATIC mp_obj_t mp_lcd_bus_get_frame_buffer(size_t n_args, const mp_obj_t *pos_a
     mp_lcd_bus_obj_t *self = (mp_lcd_bus_obj_t *)args[ARG_self].u_obj;
     int buf_num = args[ARG_buffer_number].u_int;
 
-    mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL};
-
     if (buf_num == 1) {
-        if (self->buf1 == NULL) {
+        if (self->buf1.items == NULL) {
             return mp_const_none;
         }
-        ar.items = (void *)self->buf1;
+        return MP_OBJ_FROM_PTR(&self->buf1);
     } else {
-        if (self->buf2 == NULL) {
+        if (self->buf2.items == NULL) {
             return mp_const_none;
         }
-        ar.items = (void *)self->buf2;
-
+        return MP_OBJ_FROM_PTR(&self->buf2);
     }
-
-    return MP_OBJ_FROM_PTR(&ar);
 }
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_bus_get_frame_buffer_obj, 2, mp_lcd_bus_get_frame_buffer);

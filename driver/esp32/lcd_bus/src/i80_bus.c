@@ -123,6 +123,8 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
     self->base.type = &mp_lcd_i80_bus_type;
 
     #if SOC_LCD_I80_SUPPORTED
+        initilize_buffers((mp_lcd_bus_obj_t *)self);
+
         self->buffer_size = (int) args[ARG_buffer_size].u_int;
         self->fb_in_psram = (bool) args[ARG_fb_in_psram].u_bool;
         self->use_dma = (bool) args[ARG_use_dma].u_bool;
@@ -252,8 +254,8 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
             mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_del_i80_bus)", ret);
         }
 
-        heap_caps_free(self->buf1);
-        heap_caps_free(self->buf2);
+        heap_caps_free(self->buf1.items);
+        heap_caps_free(self->buf2.items);
 
         return mp_const_none;
     }

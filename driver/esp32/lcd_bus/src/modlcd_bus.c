@@ -13,6 +13,7 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/objarray.h"
+#include "py/binary.h"
 
 
 bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
@@ -28,6 +29,16 @@ bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_even
     return false;
 }
 
+
+void initilize_buffers(mp_lcd_bus_obj_t *self) {
+    mp_obj_array_t buf1 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, (size_t)self->buffer_size, 0, NULL};
+    mp_obj_array_t buf2 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, (size_t)self->buffer_size, 0, NULL};
+
+    self->buf1 = buf1;
+    self->buf2 = buf2;
+}
+
+
 void allocate_buffers(mp_lcd_bus_obj_t *self) {
     uint32_t mem_cap = 0;
 
@@ -39,10 +50,10 @@ void allocate_buffers(mp_lcd_bus_obj_t *self) {
 
     if (self->use_dma) {
         mem_cap |= MALLOC_CAP_DMA;
-        self->buf1 = (uint8_t *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
-        self->buf2 = (uint8_t *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        self->buf1.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        self->buf2.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
     } else {
-        self->buf1 = (uint8_t *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        self->buf1.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
     }
 }
 

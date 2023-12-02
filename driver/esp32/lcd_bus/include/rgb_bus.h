@@ -2,6 +2,7 @@
 #include "mphalport.h"
 #include "py/obj.h"
 #include "esp_lcd_panel_io.h"
+#include "py/objarray.h"
 
 
 #if SOC_LCD_RGB_SUPPORTED
@@ -20,8 +21,8 @@ typedef struct _mp_lcd_rgb_bus_obj_t {
     bool use_dma;
     bool trans_done;
 
-    uint8_t *buf1;
-    uint8_t *buf2;
+    mp_obj_array_t buf1;
+    mp_obj_array_t buf2;
 
 #if SOC_LCD_RGB_SUPPORTED
     esp_lcd_panel_handle_t panel_io_handle;

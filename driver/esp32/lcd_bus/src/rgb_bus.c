@@ -8,7 +8,6 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/objarray.h"
-#include "py/binary.h"
 
 #include <string.h>
 
@@ -124,6 +123,8 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     self->base.type = &mp_lcd_rgb_bus_type;
 
     #if SOC_LCD_RGB_SUPPORTED
+        initilize_buffers((mp_lcd_bus_obj_t *)self);
+
         self->callback = mp_const_none;
         self->user_ctx = mp_const_none;
 
@@ -236,8 +237,13 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         if (ret != 0) {
             mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_init)", ret);
         }
-    
-    
+
+        if (self->panel_io_config.num_fbs == 1) {
+            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 2, self->buf1.items, self->buf2.items);
+        } else {
+            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 1, self->buf1.items);
+        }
+
         return mp_const_none;
     }
     
@@ -251,6 +257,10 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         if (ret != 0) {
             mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_del)", ret);
         }
+
+        heap_caps_free(self->buf1.items);
+        heap_caps_free(self->buf2.items);
+
         return mp_const_none;
     }
     
@@ -382,51 +392,10 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_rgb_bus_rx_param_obj, 3, mp_lcd_rgb_bus_rx_param);
     
     */
-    STATIC mp_obj_t mp_lcd_rgb_bus_get_frame_buffer(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-        enum { ARG_self, ARG_buffer_number };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_self,         MP_ARG_OBJ | MP_ARG_REQUIRED  },
-            { MP_QSTR_buffer_number,   MP_ARG_INT | MP_ARG_REQUIRED  }
-        };
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
-        mp_lcd_rgb_bus_obj_t *self = (mp_lcd_rgb_bus_obj_t *)args[ARG_self].u_obj;
-        int buf_num = args[ARG_buffer_number].u_int;
-    
-        void *buf1;
-        void *buf2;
-    
-        if (self->panel_io_config.flags.double_fb == 1) {
-            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 2, &buf1, &buf2);
-        } else {
-            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 1, &buf1);
-        }
 
-        mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL};
-
-        if (buf_num == 1) {
-            if (self->buf1 == NULL) {
-                return mp_const_none;
-            }
-            ar.items = buf1;
-        } else {
-            if (self->buf2 == NULL) {
-                return mp_const_none;
-            }
-            ar.items = buf2;
-
-        }
-
-        return MP_OBJ_FROM_PTR(&ar);
-    }
-
-    STATIC MP_DEFINE_CONST_FUN_OBJ_KW(mp_lcd_rgb_bus_get_frame_buffer_obj, 2, mp_lcd_rgb_bus_get_frame_buffer);
-    
-    
     STATIC const mp_rom_map_elem_t mp_lcd_rgb_bus_locals_dict_table[] = {
         { MP_ROM_QSTR(MP_QSTR_get_frame_buffer_size),  MP_ROM_PTR(&mp_lcd_bus_get_frame_buffer_size_obj)  },
-        { MP_ROM_QSTR(MP_QSTR_get_frame_buffer),  MP_ROM_PTR(&mp_lcd_rgb_bus_get_frame_buffer_obj)  },
+        { MP_ROM_QSTR(MP_QSTR_get_frame_buffer),  MP_ROM_PTR(&mp_lcd_bus_get_frame_buffer_obj)      },
         { MP_ROM_QSTR(MP_QSTR_tx_param),          MP_ROM_PTR(&mp_lcd_rgb_bus_tx_param_obj)          },
         { MP_ROM_QSTR(MP_QSTR_tx_color),          MP_ROM_PTR(&mp_lcd_rgb_bus_tx_color_obj)          },
         /*{ MP_ROM_QSTR(MP_QSTR_rx_param),          MP_ROM_PTR(&mp_lcd_rgb_bus_rx_param_obj)          },*/
