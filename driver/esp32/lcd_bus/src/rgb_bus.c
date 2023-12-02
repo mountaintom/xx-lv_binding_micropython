@@ -8,6 +8,7 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/objarray.h"
+#include "py/binary.h"
 
 #include <string.h>
 
@@ -402,7 +403,7 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
             esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 1, &buf1);
         }
 
-        mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL}
+        mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL};
 
         if (buf_num == 1) {
             if (self->buf1 == NULL) {

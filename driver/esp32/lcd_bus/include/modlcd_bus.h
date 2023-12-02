@@ -3,6 +3,7 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/objarray.h"
+#include "py/binary.h"
 
 #include "esp_lcd_panel_io.h"
 
@@ -170,7 +171,7 @@ STATIC mp_obj_t mp_lcd_bus_get_frame_buffer(size_t n_args, const mp_obj_t *pos_a
     mp_lcd_bus_obj_t *self = (mp_lcd_bus_obj_t *)args[ARG_self].u_obj;
     int buf_num = args[ARG_buffer_number].u_int;
 
-    mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL}
+    mp_obj_array_t ar = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE, 0, self->buffer_size, NULL};
 
     if (buf_num == 1) {
         if (self->buf1 == NULL) {
