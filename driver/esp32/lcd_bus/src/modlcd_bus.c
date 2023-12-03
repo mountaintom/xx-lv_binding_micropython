@@ -20,7 +20,7 @@ bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_even
 {
     mp_lcd_bus_obj_t *bus_obj = (mp_lcd_bus_obj_t *)user_ctx;
     if (bus_obj->callback != mp_const_none) {
-        mp_sched_schedule(bus_obj->callback, bus_obj->user_ctx);
+        mp_call_function_n_kw(bus_obj->callback, 1, 0, bus_obj->user_ctx);
     } else {
         bus_obj->trans_done = true;
     }
