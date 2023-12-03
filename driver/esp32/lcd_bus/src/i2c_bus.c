@@ -126,18 +126,18 @@ STATIC mp_obj_t mp_lcd_i2c_bus_init(size_t n_args, const mp_obj_t *pos_args, mp_
 
     esp_err_t ret = i2c_param_config(self->host, &self->bus_config);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(i2c_param_config)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(i2c_param_config)"), ret);
     }
 
     ret = i2c_driver_install(self->host, I2C_MODE_MASTER, 0, 0, 0);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(i2c_driver_install)", ret);
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("%d(i2c_driver_install)"), ret);
     }
 
     ret = esp_lcd_new_panel_io_i2c(self->bus_handle , &self->panel_io_config, &self->panel_io_handle);
 
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_new_panel_io_i2c)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_new_panel_io_i2c)"), ret);
     }
 
     return mp_const_none;
@@ -151,11 +151,11 @@ STATIC mp_obj_t mp_lcd_i2c_bus_deinit(mp_obj_t self_in) {
 
     esp_err_t ret = esp_lcd_panel_io_del(self->panel_io_handle);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_del)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_io_del)"), ret);
     }
     ret = i2c_driver_delete(self->host);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(i2c_driver_delete)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(i2c_driver_delete)"), ret);
     }
 
     heap_caps_free(self->buf1.items);

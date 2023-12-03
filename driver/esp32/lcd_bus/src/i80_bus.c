@@ -195,7 +195,7 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
         self->panel_io_config.flags.pclk_idle_low = (unsigned int)args[ARG_pclk_idle_low].u_bool;
 
     #else
-        mp_raise_msg(&mp_type_OSError, "I8080 display bus is not supported by this board");
+        mp_raise_msg(&mp_type_NotImplementedError, MP_ERROR_TEXT("I8080 display bus is not supported by this board"));
     #endif
 
     return MP_OBJ_FROM_PTR(self);
@@ -227,12 +227,12 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
 
         esp_err_t ret = esp_lcd_new_i80_bus(&self->bus_config, &self->bus_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_new_i80_bus)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_new_i80_bus)"), ret);
         }
 
         ret = esp_lcd_new_panel_io_i80(self->bus_handle, &self->panel_io_config, &self->panel_io_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_new_panel_io_i80)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_new_panel_io_i80)"), ret);
         }
 
         return mp_const_none;
@@ -246,12 +246,12 @@ STATIC mp_obj_t mp_lcd_i80_bus_make_new(const mp_obj_type_t *type, size_t n_args
 
         esp_err_t ret = esp_lcd_panel_io_del(self->panel_io_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_del)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_io_del)"), ret);
         }
 
         ret = esp_lcd_del_i80_bus(self->bus_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_del_i80_bus)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_del_i80_bus)"), ret);
         }
 
         heap_caps_free(self->buf1.items);

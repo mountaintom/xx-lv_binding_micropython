@@ -52,8 +52,15 @@ void allocate_buffers(mp_lcd_bus_obj_t *self) {
         mem_cap |= MALLOC_CAP_DMA;
         self->buf1.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
         self->buf2.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+
+        if ((self->buf1.items == NULL) || (self->buf2.items == NULL)) {
+            mp_raise_msg_varg(&mp_type_MemoryError, MP_ERROR_TEXT("Buffer size is to large to fit into DMA memory try decreasing the size (%d)"), ret);
+        }
     } else {
         self->buf1.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        if (self->buf1.items == NULL) {
+            mp_raise_msg_varg(&mp_type_MemoryError, MP_ERROR_TEXT("Buffer size is to large try decreasing the size (%d)"), ret);
+        }
     }
 }
 

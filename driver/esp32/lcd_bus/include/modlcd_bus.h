@@ -90,7 +90,7 @@ STATIC mp_obj_t mp_lcd_bus_tx_color(size_t n_args, const mp_obj_t *pos_args, mp_
     );
 
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_tx_color)", ret);
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("%d(esp_lcd_panel_io_tx_color)"), ret);
     }
 
     if ((self->use_dma == false) && (self->callback != mp_const_none)) {
@@ -129,7 +129,7 @@ STATIC mp_obj_t mp_lcd_bus_rx_param(size_t n_args, const mp_obj_t *pos_args, mp_
     );
 
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_rx_param)", ret);
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("%d(esp_lcd_panel_io_rx_param)"), ret);
     }
     return mp_const_none;
 }

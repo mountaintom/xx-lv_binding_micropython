@@ -112,7 +112,7 @@ STATIC mp_obj_t mp_lcd_spi_bus_make_new(const mp_obj_type_t *type, size_t n_args
     int hd = (int) args[ARG_hd].u_int;
 
     if ((args[ARG_spi_mode].u_int > 3) || (args[ARG_spi_mode].u_int < 0)) {
-        mp_raise_msg_varg(&mp_type_OSError, "invalid spi mode (%d)", args[ARG_spi_mode].u_int);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("invalid spi mode (%d)"), args[ARG_spi_mode].u_int);
     }
 
 
@@ -146,7 +146,7 @@ STATIC mp_obj_t mp_lcd_spi_bus_make_new(const mp_obj_type_t *type, size_t n_args
                 }
             }
         } else {
-            mp_raise_msg_varg(&mp_type_OSError, "invalid host (%d)", host);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("invalid host (%d)"), host);
         }
     }
 
@@ -248,12 +248,12 @@ STATIC mp_obj_t mp_lcd_spi_bus_init(size_t n_args, const mp_obj_t *pos_args, mp_
 
     esp_err_t ret = spi_bus_initialize(self->host, &self->bus_config, self->use_dma ? SPI_DMA_CH_AUTO : SPI_DMA_DISABLED);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(spi_bus_initialize)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(spi_bus_initialize)"), ret);
     }
 
     ret = esp_lcd_new_panel_io_spi(self->bus_handle, &self->panel_io_config, &self->panel_io_handle);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_new_panel_io_spi)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_new_panel_io_spi)"), ret);
     }
 
     return mp_const_none;
@@ -267,12 +267,12 @@ STATIC mp_obj_t mp_lcd_spi_bus_deinit(mp_obj_t self_in) {
 
     esp_err_t ret = esp_lcd_panel_io_del(self->panel_io_handle);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_io_del)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_io_del)"), ret);
     }
 
     ret = spi_bus_free(self->host);
     if (ret != 0) {
-        mp_raise_msg_varg(&mp_type_OSError, "%d(spi_bus_free)", ret);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(spi_bus_free)"), ret);
     }
 
     gpio_pad_select_gpio(self->bus_config.miso_io_num);

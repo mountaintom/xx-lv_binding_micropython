@@ -184,7 +184,7 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
 
         self->panel_io_config.data_width = (size_t)(i + 1);
     #else
-        mp_raise_msg(&mp_type_OSError, "RGB display bus is not supported by this board");
+        mp_raise_msg(&mp_type_NotImplementedError, MP_ERROR_TEXT("RGB display bus is not supported by this board"));
     #endif
 
     return MP_OBJ_FROM_PTR(self);
@@ -216,7 +216,7 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     
         esp_err_t ret = esp_lcd_new_rgb_panel(&self->panel_io_config, &self->panel_io_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_new_rgb_panel)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_new_rgb_panel)"), ret);
         }
     
         esp_lcd_rgb_panel_event_callbacks_t callbacks = {
@@ -225,17 +225,17 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     
         ret = esp_lcd_rgb_panel_register_event_callbacks(self->panel_io_handle, &callbacks, self);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_rgb_panel_register_event_callbacks)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_rgb_panel_register_event_callbacks)"), ret);
         }
     
         ret = esp_lcd_panel_reset(self->panel_io_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_reset)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_reset)"), ret);
         }
     
         ret = esp_lcd_panel_init(self->panel_io_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_init)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_init)"), ret);
         }
 
         if (self->panel_io_config.num_fbs == 1) {
@@ -255,7 +255,7 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     
         esp_err_t ret = esp_lcd_panel_del(self->panel_io_handle);
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_del)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_del)"), ret);
         }
 
         heap_caps_free(self->buf1.items);
@@ -351,7 +351,7 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         );
 
         if (ret != 0) {
-            mp_raise_msg_varg(&mp_type_OSError, "%d(esp_lcd_panel_draw_bitmap)", ret);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_draw_bitmap)"), ret);
         }
 
         if (self->callback != mp_const_none) {
