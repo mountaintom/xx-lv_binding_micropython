@@ -130,7 +130,7 @@ class DisplayDriver:
         self._frame_buffer_2 = data_bus.get_frame_buffer(2)
         frame_buffer_size = data_bus.get_frame_buffer_size()
 
-        self._disp_drv = lv.disp_create(self.display_width, self.display_height)
+        self._disp_drv = lv.display_create(self.display_width, self.display_height)
         self._disp_drv.set_flush_cb(self._flush_cb)
 
         if isinstance(data_bus, lcd_bus.RGBBus):
@@ -271,7 +271,7 @@ class DisplayDriver:
         self._data_bus.tx_color(_RAMWR, color_p, x1, y1, x2, y2)
 
     def _flush_ready_cb(self, disp_drv):
-        lv.flush_ready(disp_drv)
+        disp_drv.flush_ready()
 
     @staticmethod
     def _madctl(colormode, rotation, rotations):

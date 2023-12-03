@@ -117,7 +117,7 @@ STATIC mp_obj_t mp_lcd_spi_bus_make_new(const mp_obj_type_t *type, size_t n_args
 
 
     if ((mosi == -1) && (miso == -1) && (sclk == -1)) {
-        if (host == 2) {
+        if (host == 1) {
             cs = 15;
             sclk = 14;
             miso = 12;
@@ -131,7 +131,7 @@ STATIC mp_obj_t mp_lcd_spi_bus_make_new(const mp_obj_type_t *type, size_t n_args
                     hd = 4;
                 }
             }
-        } else if (host == 3) {
+        } else if (host == 2) {
             cs = 5;
             sclk = 18;
             miso = 19;
