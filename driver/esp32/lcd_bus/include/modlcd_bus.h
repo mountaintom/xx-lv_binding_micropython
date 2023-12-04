@@ -20,8 +20,8 @@ typedef struct _mp_lcd_bus_obj_t {
     bool use_dma;
     bool trans_done;
 
-    mp_obj_array_t buf1;
-    mp_obj_array_t buf2;
+    void *buf1;
+    void *buf2;
 
     esp_lcd_panel_io_handle_t panel_io_handle;
 
@@ -171,15 +171,15 @@ STATIC mp_obj_t mp_lcd_bus_get_frame_buffer(size_t n_args, const mp_obj_t *pos_a
     int buf_num = args[ARG_buffer_number].u_int;
 
     if (buf_num == 1) {
-        if (self->buf1.items == NULL) {
+        if (self->buf1 == NULL) {
             return mp_const_none;
         }
-        return MP_OBJ_FROM_PTR(&self->buf1);
+        return mp_obj_new_bytearray_by_ref((size_t)self->buffer_size, self->buf1);
     } else {
-        if (self->buf2.items == NULL) {
+        if (self->buf2 == NULL) {
             return mp_const_none;
         }
-        return MP_OBJ_FROM_PTR(&self->buf2);
+        return mp_obj_new_bytearray_by_ref((size_t)self->buffer_size, self->buf2);
     }
     //return mp_obj_new_memoryview(BYTEARRAY_TYPECODE | MP_OBJ_ARRAY_TYPECODE_FLAG_RW, size, buffer);
 }

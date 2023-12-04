@@ -17,8 +17,8 @@ typedef struct _mp_lcd_i2c_bus_obj_t {
     bool use_dma;
     bool trans_done;
 
-    mp_obj_array_t buf1;
-    mp_obj_array_t buf2;
+    void *buf1;
+    void *buf2;
 
     esp_lcd_panel_io_handle_t panel_io_handle;
     esp_lcd_panel_io_i2c_config_t panel_io_config;

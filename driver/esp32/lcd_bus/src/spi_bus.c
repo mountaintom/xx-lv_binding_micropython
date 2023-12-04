@@ -84,8 +84,6 @@ STATIC mp_obj_t mp_lcd_spi_bus_make_new(const mp_obj_type_t *type, size_t n_args
     mp_lcd_spi_bus_obj_t *self = m_new_obj(mp_lcd_spi_bus_obj_t);
     self->base.type = &mp_lcd_spi_bus_type;
 
-    initilize_buffers((mp_lcd_bus_obj_t *)self);
-
     self->buffer_size = (int)args[ARG_buffer_size].u_int;
     self->fb_in_psram = (bool)args[ARG_fb_in_psram].u_bool;
     self->use_dma = (bool)args[ARG_use_dma].u_bool;
@@ -287,8 +285,8 @@ STATIC mp_obj_t mp_lcd_spi_bus_deinit(mp_obj_t self_in) {
     gpio_matrix_out(self->bus_config.sclk_io_num, SIG_GPIO_OUT_IDX, false, false);
     gpio_set_direction(self->bus_config.sclk_io_num, GPIO_MODE_INPUT);
 
-    heap_caps_free(self->buf1.items);
-    heap_caps_free(self->buf2.items);
+    heap_caps_free(self->buf1);
+    heap_caps_free(self->buf2);
 
     return mp_const_none;
 }

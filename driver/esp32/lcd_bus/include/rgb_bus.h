@@ -21,8 +21,8 @@ typedef struct _mp_lcd_rgb_bus_obj_t {
     bool use_dma;
     bool trans_done;
 
-    mp_obj_array_t buf1;
-    mp_obj_array_t buf2;
+    void *buf1;
+    void *buf2;
 
 #if SOC_LCD_RGB_SUPPORTED
     esp_lcd_panel_handle_t panel_io_handle;

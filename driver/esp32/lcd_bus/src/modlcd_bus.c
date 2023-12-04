@@ -30,15 +30,6 @@ bool bus_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_even
 }
 
 
-void initilize_buffers(mp_lcd_bus_obj_t *self) {
-    mp_obj_array_t buf1 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE | MP_OBJ_ARRAY_TYPECODE_FLAG_RW, (size_t)self->buffer_size, 0, NULL};
-    mp_obj_array_t buf2 = {{&mp_type_bytearray}, BYTEARRAY_TYPECODE | MP_OBJ_ARRAY_TYPECODE_FLAG_RW, (size_t)self->buffer_size, 0, NULL};
-
-    self->buf1 = buf1;
-    self->buf2 = buf2;
-}
-
-
 void allocate_buffers(mp_lcd_bus_obj_t *self) {
     uint32_t mem_cap = 0;
 
@@ -47,19 +38,18 @@ void allocate_buffers(mp_lcd_bus_obj_t *self) {
     } else {
         mem_cap |= MALLOC_CAP_INTERNAL;
     }
-
     if (self->use_dma) {
         mem_cap |= MALLOC_CAP_DMA;
-        self->buf1.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
-        self->buf2.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        self->buf1 = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        self->buf2 = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
 
-        if ((self->buf1.items == NULL) || (self->buf2.items == NULL)) {
-            mp_raise_msg_varg(&mp_type_MemoryError, MP_ERROR_TEXT("Buffer size is to large to fit into DMA memory try decreasing the size (%d)"), ret);
+        if ((self->buf1 == NULL) || (self->buf2 == NULL)) {
+            mp_raise_msg_varg(&mp_type_MemoryError, MP_ERROR_TEXT("Buffer size is to large to fit into DMA memory try decreasing the size (%d)"), self->buffer_size);
         }
     } else {
-        self->buf1.items = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
-        if (self->buf1.items == NULL) {
-            mp_raise_msg_varg(&mp_type_MemoryError, MP_ERROR_TEXT("Buffer size is to large try decreasing the size (%d)"), ret);
+        self->buf1 = (void *)heap_caps_malloc((size_t)self->buffer_size, mem_cap);
+        if (self->buf1 == NULL) {
+            mp_raise_msg_varg(&mp_type_MemoryError, MP_ERROR_TEXT("Buffer size is to large try decreasing the size (%d)"), self->buffer_size);
         }
     }
 }

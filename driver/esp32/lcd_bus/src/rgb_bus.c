@@ -123,8 +123,6 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
     self->base.type = &mp_lcd_rgb_bus_type;
 
     #if SOC_LCD_RGB_SUPPORTED
-        initilize_buffers((mp_lcd_bus_obj_t *)self);
-
         self->callback = mp_const_none;
         self->user_ctx = mp_const_none;
 
@@ -239,9 +237,9 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
         }
 
         if (self->panel_io_config.num_fbs == 1) {
-            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 2, self->buf1.items, self->buf2.items);
+            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 2, self->buf1, self->buf2);
         } else {
-            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 1, self->buf1.items);
+            esp_lcd_rgb_panel_get_frame_buffer(self->panel_io_handle, 1, self->buf1);
         }
 
         return mp_const_none;
@@ -258,8 +256,8 @@ mp_obj_t mp_lcd_rgb_bus_make_new(const mp_obj_type_t *type, size_t n_args, size_
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%d(esp_lcd_panel_del)"), ret);
         }
 
-        heap_caps_free(self->buf1.items);
-        heap_caps_free(self->buf2.items);
+        heap_caps_free(self->buf1);
+        heap_caps_free(self->buf2);
 
         return mp_const_none;
     }
